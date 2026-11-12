@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Hemoglovida | Atendimento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/hemocentro/atendimento.css') }}">
+
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">
+      <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
+      Hemoglovida
+    </div>
+
+    <nav>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php" class="active">Atendimento</a>
+      <a href="Hem_Estoque.blade.php">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
+    </nav>
+  </div>
+
+    <div class="user">
+     <span>Bem-vindo, Dr. Walter White</span>
+      <a href="Hem_Usuario.blade.php">
+      <div class="avatar">
+        <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
+      </div>
+      </a>
+    </div>
+</header>
+
+  <main class="dashboard">
+
+    <div class="page-header">
+      <div>
+        <h1>Atendimento</h1>
+      </div>
+    </div>
+
+    <div class="layout">
+
+      <div class="layout__col">
+
+        <section class="card card--atendimento">
+          <div class="card__header">
+            <h2 class="card__title">Atendimento em Curso</h2>
+            <span class="badge-time" id="badgeHorario">09:30</span>
+          </div>
+
+          <div class="paciente">
+            <img class="paciente__foto" id="pacienteFoto" src="../../assets/JessePinkman.png" alt="Foto do paciente">
+            <div class="paciente__info">
+              <p class="paciente__nome" id="pacienteNome">Jesse Pinkman</p>
+              <div class="paciente__dados">
+                <span id="pacienteTipo">Tipo Sanguíneo: O-</span>
+                <span id="pacienteCpf">CPF: 452.*.-01</span>
+              </div>
+              <span class="tag" id="pacienteTag">Doador Frequente</span>
+            </div>
+          </div>
+
+          <div class="stepper">
+            <div class="step">
+              <span class="step__circle step__circle--done">&#10003;</span>
+              <span class="step__label">Agendado</span>
+            </div>
+            <span class="step__line step__line--done"></span>
+            <div class="step">
+              <span class="step__circle step__circle--current"></span>
+              <span class="step__label step__label--current">Chegou</span>
+            </div>
+            <span class="step__line"></span>
+            <div class="step">
+              <span class="step__circle"></span>
+              <span class="step__label">Concluído</span>
+            </div>
+          </div>
+
+          <div class="card__actions">
+            <button class="btn btn-primary" id="btnConfirmarChegada">Confirmar Chegada</button>
+            <button class="btn btn-outline" id="btnDoacaoRealizada">Doação Realizada</button>
+          </div>
+        </section>
+
+        <section class="card card--observacoes">
+          <div class="card__header">
+            <h2 class="card__title">Observações Médicas</h2>
+            <a href="#" class="card__link">Ver Histórico Completo</a>
+          </div>
+          <div class="alerta" id="observacaoTexto">
+            Última doação há 4 meses. Sem restrições relatadas na triagem digital.
+          </div>
+        </section>
+
+      </div>
+
+      <div class="layout__col">
+
+        <section class="card card--agenda">
+          <h2 class="card__title">Agendamentos de Hoje</h2>
+          <ul class="agenda" id="agenda"></ul>
+          <div class="paginacao" id="paginacao"></div>
+          <a href="#" class="agenda__todos" id="linkTodos"></a>
+        </section>
+
+      </div>
+
+    </div>
+  </main>
+
+ <script src="{{ asset('js/hemocentro/atendimento.js') }}"></script>
+</body>
+</html>

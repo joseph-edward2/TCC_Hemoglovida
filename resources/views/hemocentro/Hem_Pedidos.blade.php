@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hemoglovida | Pedidos de Hospitais</title>
+
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/hemocentro/pedidos.css') }}">
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">
+      <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
+      Hemoglovida
+    </div>
+
+    <nav>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php" class="active">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
+    </nav>
+  </div>
+
+    <div class="user">
+     <span>Bem-vindo, Dr. Walter White</span>
+      <a href="Hem_Usuario.blade.php">
+      <div class="avatar">
+        <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
+      </div>
+      </a>
+    </div>
+</header>
+
+<main class="dashboard">
+
+  <div class="page-header">
+    <div>
+      <h1>Pedidos de Hospitais</h1>
+      <p class="page-desc">Gerencie e priorize o envio de bolsas de sangue para unidades de saúde.</p>
+    </div>
+
+    <div class="pedidos-filters">
+      <div class="filter-select-wrap">
+        <select class="filter-select" id="filterStatus">
+          <option>Status: Todos</option>
+          <option>Recebido</option>
+          <option>Em Separação</option>
+          <option>Enviado</option>
+          <option>Entregue</option>
+        </select>
+        <i class="ph ph-caret-down"></i>
+      </div>
+      <div class="filter-select-row">
+        <div class="filter-select-wrap">
+          <select class="filter-select" id="filterBlood">
+            <option>Tipo Sanguíneo</option>
+            <option>O-</option>
+            <option>O+</option>
+            <option>A+</option>
+            <option>A-</option>
+            <option>B+</option>
+            <option>B-</option>
+            <option>AB+</option>
+            <option>AB-</option>
+          </select>
+          <i class="ph ph-caret-down"></i>
+        </div>
+        <div class="filter-select-wrap">
+          <select class="filter-select" id="filterUrgency">
+            <option>Urgência: Todas</option>
+            <option>Crítico</option>
+            <option>Urgente</option>
+            <option>Rotina</option>
+          </select>
+          <i class="ph ph-caret-down"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="ped-stats">
+    <div class="ped-stat-card">
+      <div class="ped-stat-info">
+        <span class="ped-stat-label">Pedidos<br>Pendentes</span>
+        <span class="ped-stat-value" id="statPending">12</span>
+      </div>
+      <i class="ph ph-calendar-check ped-stat-icon"></i>
+    </div>
+
+    <div class="ped-stat-card">
+      <div class="ped-stat-info">
+        <span class="ped-stat-label">Em Separação</span>
+        <span class="ped-stat-value" id="statSeparating">05</span>
+      </div>
+      <i class="ph ph-clipboard-text ped-stat-icon"></i>
+    </div>
+
+    <div class="ped-stat-card is-success">
+      <div class="ped-stat-info">
+        <span class="ped-stat-label">Enviados Hoje</span>
+        <span class="ped-stat-value" id="statSentToday">08</span>
+      </div>
+      <i class="ph ph-truck ped-stat-icon"></i>
+    </div>
+
+    <div class="ped-stat-card is-critical">
+      <div class="ped-stat-info">
+        <span class="ped-stat-label">Pedidos Críticos</span>
+        <span class="ped-stat-value" id="statCritical">03</span>
+      </div>
+      <i class="ph ph-warning ped-stat-icon"></i>
+    </div>
+  </section>
+
+  <h2 class="section-title"><i class="ph ph-warning"></i> Pedidos Críticos</h2>
+  <div class="critical-list" id="criticalList"></div>
+
+  <h2 class="section-title">Pedidos Recentes</h2>
+  <div class="recent-list" id="recentList"></div>
+
+  <div class="load-more-wrap">
+    <button class="load-more" id="loadMoreBtn">Carregar mais pedidos <i class="ph ph-caret-down"></i></button>
+  </div>
+
+</main>
+
+<div class="overlay" id="detailsOverlay">
+  <div class="modal">
+    <button class="close" id="detailsClose"><i class="ph ph-x"></i></button>
+    <h2 id="detailsTitle">Detalhes do Pedido</h2>
+    <div class="details-body" id="detailsBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="{{ asset('js/hemocentro/pedidos.js') }}"></script>
+</body>
+</html>
