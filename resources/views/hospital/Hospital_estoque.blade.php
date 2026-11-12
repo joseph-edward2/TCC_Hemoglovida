@@ -5,36 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estoque — Hospital | Hemoglovida</title>
 
-  <!-- Lembrete: confira a profundidade das pastas antes de
-       colar isso no seu projeto (quantos "../" precisa) -->
   <link rel="stylesheet" href="{{ asset('/css/hospital/base.css') }}">
   <link rel="stylesheet" href="{{ asset('/css/hospital/estoque.css') }}">
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 </head>
 <body>
 
-  <!-- ======================================================
-       HEADER (classes vindas do base.css)
-       ====================================================== -->
   <header>
     <!--Título e logo-->
     <div class="header-left">
       <div class="logo">
-         <img src="https://i.ibb.co/SwCGm0fj/Hemoglovida-Logo.png" alt="Logo Hemoglovida" class="logo-icon">
+         <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
         Hemoglovida
       </div>
 
       <!--Links da navbar-->
       <nav>
-        <a href="Hospital_estoque.html" class="active">Estoque</a>
-        <a href="Hospital_pedidos.html">Pedidos</a>
+        <a href="Hospital_estoque.blade.php" class="active">Estoque</a>
+        <a href="Hospital_pedidos.blade.php">Pedidos</a>
       </nav>
     </div>
 
     <!--Ícone de usuário-->
     <div class="user">
       Bem-vindo, Renato Gonçalves
-      <a href="Hospital_usuario.html">
+      <a href="Hospital_usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/avatar.jpg') }}" alt="Foto de perfil">
       </div>
@@ -56,9 +51,6 @@
       </div>
     </div>
 
-    <!-- ====================================================
-         BANNER DE ALERTA
-         ==================================================== -->
     <div class="alert-banner">
       <div class="alert-banner__content">
         <div class="alert-banner__icon">!</div>
@@ -70,12 +62,6 @@
       <button class="btn" id="btnRequisicao">Fazer Requisição Agora</button>
     </div>
 
-    <!-- ====================================================
-         CARTÕES POR TIPO SANGUÍNEO
-         Cada .stock-card representa um tipo. A classe extra
-         "stock-card--critical" só entra quando o estoque
-         está abaixo do mínimo (aí também aparece o badge).
-         ==================================================== -->
     <div class="stock-grid">
 
       <!-- O- (crítico) -->
@@ -251,9 +237,6 @@
 
     </div><!-- /.stock-grid -->
 
-    <!-- ====================================================
-         GRÁFICO DE CONSUMO (mock estático, sem JS)
-         ==================================================== -->
     <div class="chart-card">
       <div class="chart-card__head">
         <h2>Consumo de Estoque</h2>
@@ -270,9 +253,6 @@
         </div>
       </div>
 
-      <!-- As alturas abaixo são fixas só pra representar o
-           visual do gráfico. Em um projeto real, essas
-           alturas viriam do banco de dados via JS/PHP. -->
       <div class="bar-chart">
         <div class="bar-chart__week">
           <div class="bar-chart__bars">
@@ -305,9 +285,6 @@
       </div>
     </div>
 
-    <!-- ====================================================
-         TABELA DE INVENTÁRIO DETALHADO
-         ==================================================== -->
      <div class="table-card">
     <div class="table-card__head">
       <h2>Inventário Detalhado</h2>
@@ -360,8 +337,6 @@
             <td><button class="table-action-btn" data-abrir-inventario data-bolsa="H-1236">Ver</button></td>
           </tr>
           <tr>
-            <!-- #H-1237 não tem mock ainda (veja o TODO no
-                 estoque-modal.js) — por isso, sem botão "Ver" por enquanto -->
             <td>#H-1237</td>
             <td><span class="blood-tag">B-</span></td>
             <td>Hospital Santa Casa</td>
@@ -397,7 +372,6 @@
 
     <div class="modal__body">
 
-      <!-- ---- Seção 1: Controle Interno (editável pelo hospital) ---- -->
       <div class="modal__section">
         <div class="modal__section-title">Controle Interno</div>
         <div class="modal__grid">
@@ -427,7 +401,6 @@
         </div>
       </div>
 
-      <!-- ---- Seção 2: Informações da Bolsa (só leitura, vem do hemocentro) ---- -->
       <div class="modal__section">
         <div class="modal__section-title">Informações da Bolsa</div>
         <p class="modal__hint">

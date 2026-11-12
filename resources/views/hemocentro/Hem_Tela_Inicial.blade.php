@@ -5,36 +5,32 @@
   <title>Hemoglovida | Visão Geral</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!--Importação da biblioteca de ícones "phosphor"-->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <script src="{{ asset('js/hemocentro/telainicial.js') }}"></script>
+  <script src="../../js/hemocentro/telainicial.js"></script>
   <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
 </head>
 <body>
 
 <header>
-  <!--Título e logo-->
   <div class="header-left">
     <div class="logo">
       <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
       Hemoglovida
     </div>
 
-    <!--Links da navbar-->
     <nav>
-      <a href="Hem_Tela_Inicial.html" class="active">Visão Geral</a>
-      <a href="Hem_Atendimento.html">Atendimento</a>
-      <a href="Hem_Estoque.html">Estoque</a>
-      <a href="Hem_Agendamento.html">Agendamentos</a>
-      <a href="Hem_Pedidos.html">Pedidos</a>
-      <a href="Hem_Alertas.html">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php" class="active">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
     </nav>
   </div>
 
-  <!--Ícone de usuário-->
     <div class="user">
      <span>Bem-vindo, Dr. Walter White</span>
-      <a href="Hem_Usuario.html">
+      <a href="Hem_Usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
       </div>
@@ -44,7 +40,6 @@
 
 <main class="dashboard">
 
-  <!--Cabeçalho da página-->
   <div class="page-header">
     <div>
       <h1>Visão Geral</h1>
@@ -55,7 +50,6 @@
     </div>
   </div>
 
-  <!--Cartões de resumo-->
   <section class="stats-grid">
     <div class="stat-card">
       <div class="stat-card-top">
@@ -96,10 +90,9 @@
     </div>
   </section>
 
-  <!--Estoque por tipo sanguíneo-->
   <div class="section-header">
     <h2>Estoque por Tipo Sanguíneo</h2>
-    <a href="Hem_Estoque.html" class="section-link" style="padding-right: 10px;">Ver tudo</a>
+    <a href="Hem_Estoque.blade.php" class="section-link" style="padding-right: 10px;">Ver tudo</a>
   </div>
 
   <section class="blood-grid">
@@ -186,14 +179,12 @@
     </div>
   </section>
 
-  <!--Alertas e Pedidos-->
   <section class="panels-grid" style="margin-top:36px;">
 
-    <!--Alertas emitidos-->
     <div class="panel">
       <div class="panel-header">
         <h2>Alertas Emitidos</h2>
-        <a href="Hem_Alertas.html" class="section-link">Ver tudo</a>
+        <a href="Hem_Alertas.blade.php" class="section-link">Ver tudo</a>
       </div>
       <div class="alert-list">
         <div class="alert-item is-active">
@@ -234,11 +225,10 @@
       </div>
     </div>
 
-    <!--Pedidos recentes de hospitais-->
     <div class="panel">
       <div class="panel-header">
         <h2>Pedidos Recentes de Hospitais</h2>
-        <a href="Hem_Pedidos.html" class="section-link">Gerenciar Pedidos</a>
+        <a href="Hem_Pedidos.blade.php" class="section-link">Gerenciar Pedidos</a>
       </div>
       <table class="table">
         <thead>
@@ -277,7 +267,6 @@
     </div>
   </section>
 
-  <!--Gráfico de doações-->
   <section class="chart-panel">
     <div class="chart-header">
       <div>

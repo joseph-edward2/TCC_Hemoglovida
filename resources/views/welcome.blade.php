@@ -11,10 +11,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2"></script>
 
-  <link rel="stylesheet" href="../../css/usuario/variables.css" />
-  <link rel="stylesheet" href="../../css/usuario/base.css" />
-  <link rel="stylesheet" href="../../css/usuario/components.css" />
-  <link rel="stylesheet" href="../../css/usuario/home.css" />
+  <link rel="stylesheet" href="{{ asset('css/usuario/variables.css') }}" />
+  <link rel="stylesheet" href="{{ asset('css/usuario/base.css') }} " />
+  <link rel="stylesheet" href="{{ asset('css/usuario/components.css') }} " />
+  <link rel="stylesheet" href="{{ asset('assets/css/usuario/home.css') }}" />
 </head>
 <body>
 
@@ -37,7 +37,7 @@
             dependem deste gesto hoje. Seja o herói de alguém.
           </p>
           <div class="hero__actions">
-            <a href="cadastro.html" class="btn btn-primary">
+            <a href="cadastro.blade.php" class="btn btn-primary">
               <i class="ph-fill ph-heart"></i>
               Quero Doar
             </a>
@@ -280,8 +280,8 @@
   <div id="footer-placeholder"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="../../js/usuario/components.js"></script>
-  <script src="../../js/usuario/carousel.js"></script>
-  <script src="../../js/usuario/home.js"></script>
+  <script src="{{ asset('js/usuario/components.js') }}"></script>
+  <script src="{{ asset('js/usuario/carousel.js') }}"></script>
+  <script src="{{ asset('js/usuario/home.js') }}"></script>
 </body>
 </html>

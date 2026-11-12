@@ -5,7 +5,6 @@
   <title>Hemoglovida | Triagem de Bolsas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!--Importação da biblioteca de ícones "phosphor"-->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="stylesheet" href="{{ asset('css/hemocentro/triagem.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
@@ -13,28 +12,25 @@
 <body>
 
 <header>
-  <!--Título e logo-->
   <div class="header-left">
     <div class="logo">
       <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
       Hemoglovida
     </div>
 
-    <!--Links da navbar-->
     <nav>
-      <a href="Hem_Tela_Inicial.html">Visão Geral</a>
-      <a href="Hem_Atendimento.html">Atendimento</a>
-      <a href="Hem_Estoque.html" class="active">Estoque</a>
-      <a href="Hem_Agendamento.html">Agendamentos</a>
-      <a href="Hem_Pedidos.html">Pedidos</a>
-      <a href="Hem_Alertas.html">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php" class="active">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
     </nav>
   </div>
 
-  <!--Ícone de usuário-->
     <div class="user">
      <span>Bem-vindo, Dr. Walter White</span>
-      <a href="Hem_Usuario.html">
+      <a href="Hem_Usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
       </div>
@@ -44,7 +40,6 @@
 
 <main class="dashboard">
 
-  <!--Busca e filtro-->
   <div class="search-bar-row">
     <div class="search-box">
       <i class="ph ph-magnifying-glass"></i>
@@ -53,7 +48,6 @@
     <button class="btn-filter"><i class="ph ph-funnel"></i> Filtrar</button>
   </div>
 
-  <!--Lista de triagem-->
   <div class="triage-list">
 
     <div class="triage-row">
@@ -155,6 +149,6 @@
 
 </main>
 
-<script src="{{ asset('js/hemocentro/triagem.js') }}"></script>
+<script src="{{ asset('css/hemocentro/triagem.css') }}"></script>
 </body>
 </html>

@@ -19,21 +19,21 @@
     <!--Título e logo-->
     <div class="header-left">
       <div class="logo">
-        <img src="https://i.ibb.co/SwCGm0fj/Hemoglovida-Logo.png" alt="Logo Hemoglovida" class="logo-icon">
+        <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
         Hemoglovida
       </div>
 
       <!--Links da navbar-->
       <nav>
-        <a href="Hospital_estoque.html">Estoque</a>
-        <a href="Hospital_pedidos.html" class="active">Pedidos</a>
+        <a href="Hospital_estoque.blade.php">Estoque</a>
+        <a href="Hospital_pedidos.blade.php" class="active">Pedidos</a>
       </nav>
     </div>
 
     <!--Ícone de usuário-->
     <div class="user">
       Bem-vindo, Renato Gonçalves
-      <a href="Hospital_usuario.html">
+      <a href="Hospital_usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/avatar.jpg') }}" alt="Foto de perfil">
       </div>

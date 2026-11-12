@@ -70,7 +70,7 @@
         </div>
 
         <p class="auth-card__footer">
-          Lembrou a senha? <a href="login.html">Voltar para o login</a>
+          Lembrou a senha? <a href="login.blade.php">Voltar para o login</a>
         </p>
       </div>
     </div>

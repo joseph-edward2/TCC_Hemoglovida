@@ -55,7 +55,7 @@
           <div class="form-group">
             <div class="form-label__row">
               <label class="form-label" for="senha">Senha</label>
-              <a href="recuperar-senha.html" class="form-link">Esqueci minha senha</a>
+              <a href="recuperar-senha.blade.php" class="form-link">Esqueci minha senha</a>
             </div>
             <div class="form-input-wrapper">
               <input class="form-input form-input--icon-right" type="password" id="senha" name="senha" placeholder="••••••••" required />
@@ -74,7 +74,7 @@
         </form>
 
         <p class="auth-card__footer">
-          Ainda não tem conta? <a href="cadastro.html">Cadastre-se</a>
+          Ainda não tem conta? <a href="cadastro.blade.php">Cadastre-se</a>
         </p>
       </div>
     </div>

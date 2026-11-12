@@ -15,7 +15,7 @@
     <!--Título e logo-->
     <div class="header-left">
       <div class="logo">
-         <img src="https://i.ibb.co/SwCGm0fj/Hemoglovida-Logo.png" alt="Logo Hemoglovida" class="logo-icon">
+         <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
         Hemoglovida
       </div>
     </div>

@@ -148,7 +148,7 @@
         </form>
 
         <p class="auth-card__footer">
-          Já tem uma conta? <a href="login.html">Entrar agora</a>
+          Já tem uma conta? <a href="login.blade.php">Entrar agora</a>
         </p>
       </div>
     </div>

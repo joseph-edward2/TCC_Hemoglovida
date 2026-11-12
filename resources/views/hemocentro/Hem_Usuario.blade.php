@@ -4,35 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hemoglovida — Minha Conta</title>
-<link rel="stylesheet" href="{{ asset('css/hemocentro/conta.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hemocentro/usuario.css') }}">
 <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 </head>
 <body>
 
 <header>
-  <!--Título e logo-->
   <div class="header-left">
     <div class="logo">
       <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
       Hemoglovida
     </div>
 
-    <!--Links da navbar-->
     <nav>
-      <a href="Hem_Tela_Inicial.html">Visão Geral</a>
-      <a href="Hem_Atendimento.html">Atendimento</a>
-      <a href="Hem_Estoque.html">Estoque</a>
-      <a href="Hem_Agendamento.html">Agendamentos</a>
-      <a href="Hem_Pedidos.html">Pedidos</a>
-      <a href="Hem_Alertas.html">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
     </nav>
   </div>
 
-  <!--Ícone de usuário-->
     <div class="user">
      <span>Bem-vindo, Dr. Walter White</span>
-      <a href="Hem_Usuario.html">
+      <a href="Hem_Usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
       </div>
@@ -53,7 +50,6 @@
     </div>
   </div>
 
-  <!-- DADOS PESSOAIS -->
   <section class="panel">
     <h2>Dados Pessoais</h2>
     <div class="grid-2">
@@ -89,7 +85,6 @@
     </div>
   </section>
 
-  <!-- SENHA -->
   <section class="panel">
     <h2>Senha</h2>
     <div class="field">
@@ -108,7 +103,6 @@
   </div>
 </main>
 
-<!-- MODAL ALTERAR SENHA -->
 <div class="overlay" id="passwordOverlay">
   <div class="modal">
     <button class="close" id="passwordClose"><i class="ph ph-x"></i></button>
@@ -129,7 +123,6 @@
   </div>
 </div>
 
-<!-- MODAL ENCERRAR CONTA -->
 <div class="overlay" id="deleteOverlay">
   <div class="modal">
     <button class="close" id="deleteClose"><i class="ph ph-x"></i></button>
@@ -145,6 +138,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="{{ asset('js/hemocentro/conta.js') }}"></script>
+<script src="{{ asset('css/hemocentro/usuario.css') }}"></script>
 </body>
 </html>

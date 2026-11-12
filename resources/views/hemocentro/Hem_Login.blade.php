@@ -4,13 +4,12 @@
   <meta charset="UTF-8">
   <title>Hemoglovida | Hemocentro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hemocentro/login.css') }}">
 
 </head>
 <body>
 
-  <!-- Cabeçalho -->
   <header>
     <div class="header-left">
       <div class="logo">
@@ -20,10 +19,8 @@
     </div>
   </header>
 
-  <!-- Corpo -->
   <main class="page">
 
-    <!-- Bloco de identidade -->
     <section class="hero">
       <div class="hero__row">
         <div class="hero__badge">
@@ -34,7 +31,6 @@
       <h2 class="hero__subtitle">Hemocentro</h2>
     </section>
 
-    <!-- Cartão de login -->
     <section class="login-card">
       <form id="loginForm" method="POST" novalidate>
         <div class="field">
@@ -69,7 +65,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" href="Hem_Tela_Inicial.html">Entrar</button>
+        <button type="submit" class="btn btn-primary" href="Hem_Tela_Inicial.blade.php">Entrar</button>
       </form>
 
       <p class="msg" id="msg" hidden></p>
@@ -77,6 +73,6 @@
 
   </main>
 
-  <script src="{{ asset('js/hemocentro/login.js') }}"></script>
+ <script src="{{ asset('js/hemocentro/login.js') }}"></script>
 </body>
 </html>

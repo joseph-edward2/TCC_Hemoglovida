@@ -5,36 +5,32 @@
   <title>Hemoglovida | Gestão de Estoque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!--Importação da biblioteca de ícones "phosphor"-->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hemocentro/estoque.css') }}">
 </head>
 <body>
 
 <header>
-  <!--Título e logo-->
   <div class="header-left">
     <div class="logo">
       <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
       Hemoglovida
     </div>
 
-    <!--Links da navbar-->
     <nav>
-      <a href="Hem_Tela_Inicial.html">Visão Geral</a>
-      <a href="Hem_Atendimento.html">Atendimento</a>
-      <a href="Hem_Estoque.html" class="active">Estoque</a>
-      <a href="Hem_Agendamento.html">Agendamentos</a>
-      <a href="Hem_Pedidos.html">Pedidos</a>
-      <a href="Hem_Alertas.html">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php" class="active">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
     </nav>
   </div>
 
-  <!--Ícone de usuário-->
     <div class="user">
      <span>Bem-vindo, Dr. Walter White</span>
-      <a href="Hem_Usuario.html">
+      <a href="Hem_Usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
       </div>
@@ -44,7 +40,6 @@
 
 <main class="dashboard">
 
-  <!--Cabeçalho da página-->
   <div class="page-header">
     <div>
       <h1>Gestão de Estoque</h1>
@@ -54,7 +49,6 @@
     </div>
   </div>
 
-  <!--Banner de alerta-->
   <div class="alert-banner">
     <div class="alert-banner-left">
       <div class="alert-banner-icon"><i class="ph ph-warning"></i></div>
@@ -63,10 +57,9 @@
         <div class="alert-banner-text">Níveis de O-, B+ e AB- estão abaixo da reserva de segurança operacional.</div>
       </div>
     </div>
-    <button class="btn btn-primary">Emitir alerta agora</button>
+    <button class="btn btn-primary"><a href="Hem_Alertas.blade.php">Emitir alerta</a></button>
   </div>
 
-  <!--Cartões de estoque por tipo sanguíneo-->
   <section class="stock-grid">
     <div class="stock-card">
       <div class="stock-card-head">
@@ -176,10 +169,8 @@
     </div>
   </section>
 
-  <!--Movimentação e Inventário-->
   <section class="stock-bottom-grid">
 
-    <!--Movimentação-->
     <div class="stock-side">
       <div class="panel">
         <h2 style="margin:0 0 14px;font-size:19px;">Movimentação</h2>
@@ -215,10 +206,9 @@
         </div>
       </div>
 
-      <a href="Hem_Triagem.html" class="btn btn-primary btn-block"><i class="ph ph-flask"></i> Triagem de Bolsas</a>
+      <a href="Hem_Triagem.blade.php" class="btn btn-primary btn-block"><i class="ph ph-flask"></i> Triagem de Bolsas</a>
     </div>
 
-    <!--Inventário Detalhado-->
     <div class="panel">
       <div class="panel-header">
         <h2>Inventário Detalhado</h2>
@@ -282,7 +272,7 @@
 
 </main>
 
-<script src="{{ asset('js/hemocentro/estoque.js') }}"></script>
+ <script src="{{ asset('js/hemocentro/estoque.js') }}"></script>
 
 </body>
 </html>

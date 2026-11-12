@@ -2,36 +2,35 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hemoglovida | Alertas e Campanhas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hemocentro/alertas.css') }}">
-  <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
 </head>
 <body>
 
 <header>
-  <!--Título e logo-->
   <div class="header-left">
     <div class="logo">
-      <img src="{{ asset('assets/img/HemoglovidaLogo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
+      <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
       Hemoglovida
     </div>
 
-    <!--Links da navbar-->
     <nav>
-      <a href="Hem_Tela_Inicial.html" >Visão Geral</a>
-      <a href="Hem_Atendimento.html">Atendimento</a>
-      <a href="Hem_Estoque.html">Estoque</a>
-      <a href="Hem_Agendamento.html">Agendamentos</a>
-      <a href="Hem_Pedidos.html">Pedidos</a>
-      <a href="Hem_Alertas.html" class="active">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php" class="active">Alertas</a>
     </nav>
   </div>
 
-  <!--Ícone de usuário-->
     <div class="user">
      <span>Bem-vindo, Dr. Walter White</span>
-      <a href="Hem_Usuario.html">
+      <a href="Hem_Usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
       </div>
@@ -39,15 +38,12 @@
     </div>
 </header>
 
-  <!-- Conteúdo principal -->
   <main class="dashboard">
 
-    <!-- Cabeçalho da página -->
     <div class="page-header">
       <h1 class="page-title">Alertas e Campanhas</h1>
     </div>
 
-    <!-- KPIs -->
     <div class="kpi-row">
       <div class="kpi-card">
         <div class="kpi-content">
@@ -78,10 +74,8 @@
       </div>
     </div>
 
-    <!-- Bloco principal: Alertas Publicados + Criar Novo Alerta -->
     <div class="two-columns">
 
-      <!-- Alertas Publicados -->
       <div class="card card--alerts">
         <div class="card-header">
           <h2 class="card-title">Alertas Publicados</h2>
@@ -145,7 +139,6 @@
         </table>
       </div>
 
-      <!-- Criar Novo Alerta -->
       <div class="card card--form">
         <div class="card-header">
           <h2 class="card-title">Criar Novo Alerta</h2>
@@ -218,7 +211,6 @@
       </div>
     </div>
 
-    <!-- Seção Campanhas -->
     <section class="section-campaigns">
       <h2 class="section-title">Campanhas</h2>
       <div class="card card--campaign-form">
@@ -233,7 +225,6 @@
         </div>
         <form id="formCampanha">
           <div class="campaign-columns">
-            <!-- Coluna esquerda -->
             <div class="campaign-col">
               <div class="form-group">
                 <label class="form-label">Título da Campanha</label>
@@ -257,7 +248,6 @@
                 </div>
               </div>
             </div>
-            <!-- Coluna direita -->
             <div class="campaign-col">
               <div class="form-group">
                 <label class="form-label">Nível de Urgência</label>
@@ -303,7 +293,6 @@
       </div>
     </section>
 
-    <!-- Vitrine de Campanhas -->
     <div class="campaign-cards">
       <div class="campaign-card">
         <img src="{{ asset('assets/campanhadoacao.jpeg') }}" alt="Campanha de Doação" class="campaign-card-img">
@@ -352,6 +341,6 @@
 
   </main>
 
-  <script src="{{ asset('js/hemocentro/alertas.js') }}"></script>
+ <script src="{{ asset('js/hemocentro/alertas.js') }}"></script>
 </body>
 </html>

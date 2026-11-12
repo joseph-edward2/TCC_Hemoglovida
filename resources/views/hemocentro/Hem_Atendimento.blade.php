@@ -5,37 +5,33 @@
   <title>Hemoglovida | Atendimento</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!--Importação da biblioteca de ícones "phosphor"-->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hemocentro/atendimento.css') }}">
 
 </head>
 <body>
 
 <header>
-  <!--Título e logo-->
   <div class="header-left">
     <div class="logo">
       <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
       Hemoglovida
     </div>
 
-    <!--Links da navbar-->
     <nav>
-      <a href="Hem_Tela_Inicial.html">Visão Geral</a>
-      <a href="Hem_Atendimento.html" class="active">Atendimento</a>
-      <a href="Hem_Estoque.html">Estoque</a>
-      <a href="Hem_Agendamento.html">Agendamentos</a>
-      <a href="Hem_Pedidos.html">Pedidos</a>
-      <a href="Hem_Alertas.html">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php" class="active">Atendimento</a>
+      <a href="Hem_Estoque.blade.php">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
     </nav>
   </div>
 
-  <!--Ícone de usuário-->
     <div class="user">
      <span>Bem-vindo, Dr. Walter White</span>
-      <a href="Hem_Usuario.html">
+      <a href="Hem_Usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
       </div>
@@ -43,10 +39,8 @@
     </div>
 </header>
 
-  <!-- Conteúdo -->
   <main class="dashboard">
 
-    <!--Cabeçalho da página-->
     <div class="page-header">
       <div>
         <h1>Atendimento</h1>
@@ -55,30 +49,26 @@
 
     <div class="layout">
 
-      <!-- Coluna esquerda -->
       <div class="layout__col">
 
-        <!-- Card: Atendimento em Curso -->
         <section class="card card--atendimento">
           <div class="card__header">
             <h2 class="card__title">Atendimento em Curso</h2>
-            <span class="badge-time">09:30</span>
+            <span class="badge-time" id="badgeHorario">09:30</span>
           </div>
 
-          <!-- Bloco do paciente -->
           <div class="paciente">
-            <img class="paciente__foto" src="{{ asset('assets/JessePinkman.png') }}" alt="Foto do paciente">
+            <img class="paciente__foto" id="pacienteFoto" src="../../assets/JessePinkman.png" alt="Foto do paciente">
             <div class="paciente__info">
-              <p class="paciente__nome">Jesse Pinkman</p>
+              <p class="paciente__nome" id="pacienteNome">Jesse Pinkman</p>
               <div class="paciente__dados">
-                <span>Tipo Sanguíneo: O-</span>
-                <span>CPF: 452.*.-01</span>
+                <span id="pacienteTipo">Tipo Sanguíneo: O-</span>
+                <span id="pacienteCpf">CPF: 452.*.-01</span>
               </div>
-              <span class="tag">Doador Frequente</span>
+              <span class="tag" id="pacienteTag">Doador Frequente</span>
             </div>
           </div>
 
-          <!-- Stepper de etapas -->
           <div class="stepper">
             <div class="step">
               <span class="step__circle step__circle--done">&#10003;</span>
@@ -96,30 +86,26 @@
             </div>
           </div>
 
-          <!-- Botões de ação -->
           <div class="card__actions">
             <button class="btn btn-primary" id="btnConfirmarChegada">Confirmar Chegada</button>
             <button class="btn btn-outline" id="btnDoacaoRealizada">Doação Realizada</button>
           </div>
         </section>
 
-        <!-- Card: Observações Médicas -->
         <section class="card card--observacoes">
           <div class="card__header">
             <h2 class="card__title">Observações Médicas</h2>
             <a href="#" class="card__link">Ver Histórico Completo</a>
           </div>
-          <div class="alerta">
+          <div class="alerta" id="observacaoTexto">
             Última doação há 4 meses. Sem restrições relatadas na triagem digital.
           </div>
         </section>
 
       </div>
 
-      <!-- Coluna direita -->
       <div class="layout__col">
 
-        <!-- Card: Agendamentos de Hoje -->
         <section class="card card--agenda">
           <h2 class="card__title">Agendamentos de Hoje</h2>
           <ul class="agenda" id="agenda"></ul>
@@ -132,6 +118,6 @@
     </div>
   </main>
 
-  <script src="{{ asset('js/hemocentro/atendimento.js') }}"></script>
+ <script src="{{ asset('js/hemocentro/atendimento.js') }}"></script>
 </body>
 </html>

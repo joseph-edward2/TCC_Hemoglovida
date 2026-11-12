@@ -69,7 +69,7 @@
           <section class="dash-section">
             <div class="dash-section__header">
               <h2 class="dash-section__title">Campanhas Próximas</h2>
-              <a href="pedidos.html" class="dash-section__link">Ver todas</a>
+              <a href="pedidos.blade.php" class="dash-section__link">Ver todas</a>
             </div>
 
             <div class="campaign-grid">
@@ -201,7 +201,7 @@
                 <p class="alert-item__text">
                   Hemocentro São Paulo necessita urgentemente de doadores deste tipo sanguíneo.
                 </p>
-                <a href="agendamentos.html" class="alert-item__link">Realizar agendamento</a>
+                <a href="agendamentos.blade.php" class="alert-item__link">Realizar agendamento</a>
               </div>
 
               <div class="alert-item">
@@ -212,7 +212,7 @@
                 <p class="alert-item__text">
                   Hosp. das Clínicas operando com 20% da meta para o mês.
                 </p>
-                <a href="agendamentos.html" class="alert-item__link">Realizar agendamento</a>
+                <a href="agendamentos.blade.php" class="alert-item__link">Realizar agendamento</a>
               </div>
             </div>
           </section>
