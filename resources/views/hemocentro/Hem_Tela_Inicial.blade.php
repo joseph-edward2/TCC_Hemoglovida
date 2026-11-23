@@ -43,10 +43,7 @@
   <div class="page-header">
     <div>
       <h1>Visão Geral</h1>
-      <p class="page-meta">Atualizado agora | 24 de Outubro, 10:30</p>
-    </div>
-    <div class="page-actions">
-      <button class="btn btn-primary"><i class="ph ph-download-simple"></i> Exportar</button>
+      <p class="page-meta">Dados consultados em <time datetime="{{ $consultedAt->toIso8601String() }}">{{ $consultedAt->format('d/m/Y H:i') }}</time></p>
     </div>
   </div>
 
@@ -54,30 +51,25 @@
     <div class="stat-card">
       <div class="stat-card-top">
         <div class="stat-icon"><i class="ph ph-drop"></i></div>
-        <span class="stat-delta">+12%</span>
       </div>
       <div class="stat-label">Total em Estoque</div>
-      <div class="stat-value">458 <span>bolsas</span></div>
-      <div class="stat-sub">Tendência semanal de alta</div>
+      <div class="stat-value">{{ $stockTotal }} <span>bolsas</span></div>
     </div>
 
     <div class="stat-card">
       <div class="stat-card-top">
         <div class="stat-icon"><i class="ph ph-calendar-check"></i></div>
       </div>
-      <div class="stat-label">Doações Hoje</div>
-      <div class="stat-value">24 <span>agendamentos</span></div>
-      <div class="stat-sub">Capacidade: 30 vagas</div>
+      <div class="stat-label">Agendamentos de Hoje</div>
+      <div class="stat-value">{{ $appointmentsToday }} <span>agendamentos</span></div>
     </div>
 
     <div class="stat-card">
       <div class="stat-card-top">
-        <div class="stat-icon"><i class="ph ph-warning"></i></div>
-        <span class="badge badge-critico">Crítico</span>
+        <div class="stat-icon"><i class="ph ph-calendar"></i></div>
       </div>
-      <div class="stat-label">Alertas Ativos</div>
-      <div class="stat-value">3 <span>críticos</span></div>
-      <div class="stat-sub">Necessário envio urgente</div>
+      <div class="stat-label">Próximos Eventos</div>
+      <div class="stat-value">{{ $upcomingEvents }} <span>eventos</span></div>
     </div>
 
     <div class="stat-card">
@@ -85,8 +77,7 @@
         <div class="stat-icon"><i class="ph ph-clipboard-text"></i></div>
       </div>
       <div class="stat-label">Pedidos Pendentes</div>
-      <div class="stat-value">12 <span>solicitações</span></div>
-      <div class="stat-sub">Aguardando separação</div>
+      <div class="stat-value">{{ $pendingRequests }} <span>solicitações</span></div>
     </div>
   </section>
 
@@ -96,132 +87,51 @@
   </div>
 
   <section class="blood-grid">
-    <div class="blood-card is-critical">
-      <div class="blood-card-top">
-        <span class="blood-type">O-</span>
-        <span class="badge badge-critico">Crítico</span>
+    @foreach (['O-' => 15, 'A-' => 10, 'O+' => 85, 'A+' => 72, 'B-' => 55, 'B+' => 64, 'AB-' => 45, 'AB+' => 90] as $bloodType => $illustrativeLevel)
+      <div class="blood-card">
+        <div class="blood-card-top">
+          <span class="blood-type">{{ $bloodType }}</span>
+        </div>
+        <div class="blood-count">{{ $stockByType->get($bloodType, 0) }}</div>
+        <span class="blood-unit">BOLSAS</span>
+        <div class="progress-track" role="progressbar" aria-label="Nível ilustrativo do estoque {{ $bloodType }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $illustrativeLevel }}">
+          <div class="progress-fill" style="width:{{ $illustrativeLevel }}%"></div>
+        </div>
+        <span class="blood-level">Nível ilustrativo {{ $illustrativeLevel }}%</span>
       </div>
-      <div class="blood-count">12</div>
-      <span class="blood-unit">BOLSAS</span>
-      <div class="progress-track"><div class="progress-fill" style="width:15%"></div></div>
-      <span class="blood-level">Nível 15%</span>
-    </div>
-
-    <div class="blood-card is-critical">
-      <div class="blood-card-top">
-        <span class="blood-type">A-</span>
-        <span class="badge badge-critico">Crítico</span>
-      </div>
-      <div class="blood-count">08</div>
-      <span class="blood-unit">BOLSAS</span>
-      <div class="progress-track"><div class="progress-fill" style="width:10%"></div></div>
-      <span class="blood-level">Nível 10%</span>
-    </div>
-
-    <div class="blood-card">
-      <div class="blood-card-top">
-        <span class="blood-type">O+</span>
-      </div>
-      <div class="blood-count">112</div>
-      <span class="blood-unit">BOLSAS</span>
-      <div class="progress-track"><div class="progress-fill" style="width:85%"></div></div>
-      <span class="blood-level">Nível 85%</span>
-    </div>
-
-    <div class="blood-card">
-      <div class="blood-card-top">
-        <span class="blood-type">A+</span>
-      </div>
-      <div class="blood-count">94</div>
-      <span class="blood-unit">BOLSAS</span>
-      <div class="progress-track"><div class="progress-fill" style="width:72%"></div></div>
-      <span class="blood-level">Nível 72%</span>
-    </div>
-
-    <div class="blood-card">
-      <div class="blood-card-top">
-        <span class="blood-type">B-</span>
-      </div>
-      <div class="blood-count">42</div>
-      <span class="blood-unit">BOLSAS</span>
-      <div class="progress-track"><div class="progress-fill" style="width:55%"></div></div>
-      <span class="blood-level">Nível 55%</span>
-    </div>
-
-    <div class="blood-card">
-      <div class="blood-card-top">
-        <span class="blood-type">B+</span>
-      </div>
-      <div class="blood-count">68</div>
-      <span class="blood-unit">BOLSAS</span>
-      <div class="progress-track"><div class="progress-fill" style="width:64%"></div></div>
-      <span class="blood-level">Nível 64%</span>
-    </div>
-
-    <div class="blood-card">
-      <div class="blood-card-top">
-        <span class="blood-type">AB-</span>
-      </div>
-      <div class="blood-count">22</div>
-      <span class="blood-unit">BOLSAS</span>
-      <div class="progress-track"><div class="progress-fill" style="width:45%"></div></div>
-      <span class="blood-level">Nível 45%</span>
-    </div>
-
-    <div class="blood-card">
-      <div class="blood-card-top">
-        <span class="blood-type">AB+</span>
-      </div>
-      <div class="blood-count">100</div>
-      <span class="blood-unit">BOLSAS</span>
-      <div class="progress-track"><div class="progress-fill" style="width:90%"></div></div>
-      <span class="blood-level">Nível 90%</span>
-    </div>
+    @endforeach
   </section>
 
   <section class="panels-grid" style="margin-top:36px;">
 
     <div class="panel">
       <div class="panel-header">
-        <h2>Alertas Emitidos</h2>
+        <h2>Eventos</h2>
         <a href="Hem_Alertas.blade.php" class="section-link">Ver tudo</a>
       </div>
       <div class="alert-list">
-        <div class="alert-item is-active">
-          <div class="alert-icon"><i class="ph ph-megaphone"></i></div>
-          <div class="alert-body">
-            <div class="alert-title">Escassez tipo O-</div>
-            <div class="alert-meta">24 Out | 08:30 &bull; 15 Respostas</div>
+        @forelse ($events as $event)
+          @php
+            $startsAt = \Carbon\CarbonImmutable::parse($event->data_hora_evento, 'UTC')->setTimezone($consultedAt->getTimezone());
+            $isUpcoming = $startsAt >= $consultedAt;
+          @endphp
+          <div @class(['alert-item', 'is-active' => $isUpcoming])>
+            <div class="alert-icon"><i class="ph ph-calendar"></i></div>
+            <div class="alert-body">
+              <div class="alert-title">{{ $event->tipo_evento }}</div>
+              <div class="alert-meta">
+                <time datetime="{{ $startsAt->toIso8601String() }}">{{ $startsAt->format('d/m/Y H:i') }}</time>
+                &bull; {{ $event->local_evento }}
+              </div>
+              @if ($event->desc_evento)
+                <div class="alert-meta">{{ $event->desc_evento }}</div>
+              @endif
+            </div>
+            <span class="alert-status {{ $isUpcoming ? 'is-ativo' : 'is-encerrado' }}">{{ $isUpcoming ? 'Programado' : 'Data passada' }}</span>
           </div>
-          <span class="alert-status is-ativo">Ativo</span>
-        </div>
-
-        <div class="alert-item">
-          <div class="alert-icon"><i class="ph ph-megaphone"></i></div>
-          <div class="alert-body">
-            <div class="alert-title">Campanha Outubro Rosa</div>
-            <div class="alert-meta">22 Out | 10:00 &bull; 142 Respostas</div>
-          </div>
-          <span class="alert-status is-encerrado">Encerrado</span>
-        </div>
-
-        <div class="alert-item">
-          <div class="alert-icon"><i class="ph ph-megaphone"></i></div>
-          <div class="alert-body">
-            <div class="alert-title">Manutenção Sistema</div>
-            <div class="alert-meta">21 Out | 14:00 &bull; N/A</div>
-          </div>
-          <span class="alert-status is-encerrado">Encerrado</span>
-        </div>
-
-        <div class="alert-item">
-          <div class="alert-icon"><i class="ph ph-megaphone"></i></div>
-          <div class="alert-body">
-            <div class="alert-title">Manutenção Sistema</div>
-            <div class="alert-meta">21 Out | 14:00 &bull; N/A</div>
-          </div>
-          <span class="alert-status is-encerrado">Encerrado</span>
-        </div>
+        @empty
+          <p class="alert-meta">Nenhum evento cadastrado.</p>
+        @endforelse
       </div>
     </div>
 
@@ -234,63 +144,62 @@
         <thead>
           <tr>
             <th>Hospital</th>
-            <th>Tipo</th>
+            <th>Descrição</th>
             <th>Qtd</th>
-            <th>Urgência</th>
+            <th>Data do pedido</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td class="hospital-name">Hospital das Clínicas</td>
-            <td class="blood-tag">O-</td>
-            <td>05</td>
-            <td class="urgencia-critica">Crítica</td>
-            <td><span class="pill pill-pendente">Pendente</span></td>
-          </tr>
-          <tr>
-            <td class="hospital-name">Santa Casa SP</td>
-            <td class="blood-tag">A+</td>
-            <td>12</td>
-            <td class="urgencia-normal">Normal</td>
-            <td><span class="pill pill-enviado">Enviado</span></td>
-          </tr>
-          <tr>
-            <td class="hospital-name">Hosp. Albert Einstein</td>
-            <td class="blood-tag">AB-</td>
-            <td>02</td>
-            <td class="urgencia-normal">Normal</td>
-            <td><span class="pill pill-pendente">Pendente</span></td>
-          </tr>
+          @forelse ($recentRequests as $order)
+            @php($requestedAt = \Carbon\CarbonImmutable::parse($order->data_hora_ped, 'UTC')->setTimezone($consultedAt->getTimezone()))
+            <tr>
+              <td class="hospital-name">{{ $order->nome_hosp }}</td>
+              <td>{{ $order->desc_ped }}</td>
+              <td>{{ $order->quant_ped }}</td>
+              <td><time datetime="{{ $requestedAt->toIso8601String() }}">{{ $requestedAt->format('d/m/Y H:i') }}</time></td>
+              <td>
+                <span @class(['pill', 'pill-pendente' => $order->status_ped === 'pendente', 'pill-enviado' => $order->status_ped === 'enviado'])>
+                  {{ ucfirst($order->status_ped) }}
+                </span>
+              </td>
+            </tr>
+          @empty
+            <tr><td colspan="5">Nenhum pedido cadastrado.</td></tr>
+          @endforelse
         </tbody>
       </table>
     </div>
   </section>
 
-  <section class="chart-panel">
+  <section class="chart-panel donations-chart">
     <div class="chart-header">
       <div>
         <h2>Doações nos últimos 7 dias</h2>
-        <p>Volume de bolsas coletadas por dia</p>
+        <p>Número de doações por dia</p>
       </div>
-      <div class="chart-legend"><span class="legend-dot"></span> Coletas</div>
     </div>
 
+    @php($scaleMaximum = 60)
     <div class="bar-chart">
-      <div class="bar-col"><div class="bar" style="height:75%"></div></div>
-      <div class="bar-col"><div class="bar" style="height:68%"></div></div>
-      <div class="bar-col"><div class="bar" style="height:100%"></div></div>
-      <div class="bar-col"><div class="bar" style="height:90%"></div></div>
-      <div class="bar-col"><div class="bar" style="height:57%"></div></div>
-      <div class="bar-col"><div class="bar" style="height:87%"></div></div>
-    </div>
-    <div class="bar-labels">
-      <span>Segunda-feira</span>
-      <span>Terça-feira</span>
-      <span>Quarta-feira</span>
-      <span>Quinta-feira</span>
-      <span>Sexta-feira</span>
-      <span>Sábado</span>
+      <div class="bar-axis" aria-hidden="true">
+        @foreach ([$scaleMaximum, 50, 40, 30, 20, 10, 1] as $tick)
+          <div class="bar-tick" style="bottom:{{ $tick * 100 / $scaleMaximum }}%"><span>{{ $tick }}</span></div>
+        @endforeach
+      </div>
+      <ol class="bar-columns" aria-label="Doações por dia">
+        @foreach ($dailyDonations as $donations)
+          <li>
+            <div class="bar-slot" aria-hidden="true">
+              <div class="bar" style="height:{{ min($donations['count'], $scaleMaximum) * 100 / $scaleMaximum }}%"></div>
+            </div>
+            <div class="bar-day">
+              <time datetime="{{ $donations['day']->toDateString() }}" title="{{ $donations['day']->isoFormat('dddd, DD/MM') }}">{{ $donations['day']->isoFormat('ddd') }}</time>
+              <strong>{{ $donations['count'] }}</strong>
+            </div>
+          </li>
+        @endforeach
+      </ol>
     </div>
   </section>
 

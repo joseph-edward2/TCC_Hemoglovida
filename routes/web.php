@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HemocentroDashboardController;
 use App\Http\Controllers\HemocentroSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +33,7 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
         Route::view('/Hem_Atendimento.blade.php', 'hemocentro.Hem_Atendimento')->name('atendimento');
         Route::view('/Hem_Estoque.blade.php', 'hemocentro.Hem_Estoque')->name('estoque');
         Route::view('/Hem_Pedidos.blade.php', 'hemocentro.Hem_Pedidos')->name('pedidos');
-        Route::view('/Hem_Tela_Inicial.blade.php', 'hemocentro.Hem_Tela_Inicial')->name('inicio');
+        Route::get('/Hem_Tela_Inicial.blade.php', HemocentroDashboardController::class)->name('inicio');
         Route::view('/Hem_Triagem.blade.php', 'hemocentro.Hem_Triagem')->name('triagem');
         Route::view('/Hem_Usuario.blade.php', 'hemocentro.Hem_Usuario')->name('usuario');
     });
