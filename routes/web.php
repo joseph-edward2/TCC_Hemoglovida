@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HemocentroAtendimentoController;
 use App\Http\Controllers\HemocentroDashboardController;
+use App\Http\Controllers\HemocentroEstoqueController;
 use App\Http\Controllers\HemocentroSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,7 +37,7 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
             ->whereNumber('protocolo')->name('atendimento.chegada');
         Route::post('/atendimento/{protocolo}/doacao-realizada', [HemocentroAtendimentoController::class, 'concluir'])
             ->whereNumber('protocolo')->name('atendimento.concluir');
-        Route::view('/Hem_Estoque.blade.php', 'hemocentro.Hem_Estoque')->name('estoque');
+        Route::get('/Hem_Estoque.blade.php', HemocentroEstoqueController::class)->name('estoque');
         Route::view('/Hem_Pedidos.blade.php', 'hemocentro.Hem_Pedidos')->name('pedidos');
         Route::get('/Hem_Tela_Inicial.blade.php', HemocentroDashboardController::class)->name('inicio');
         Route::view('/Hem_Triagem.blade.php', 'hemocentro.Hem_Triagem')->name('triagem');

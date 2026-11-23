@@ -49,167 +49,73 @@
     </div>
   </div>
 
-  <div class="alert-banner">
-    <div class="alert-banner-left">
-      <div class="alert-banner-icon"><i class="ph ph-warning"></i></div>
-      <div>
-        <div class="alert-banner-title">3 tipos sanguíneos estão com estoque crítico</div>
-        <div class="alert-banner-text">Níveis de O-, B+ e AB- estão abaixo da reserva de segurança operacional.</div>
+  @if ($criticalBloodTypes !== [])
+    <div class="alert-banner">
+      <div class="alert-banner-left">
+        <div class="alert-banner-icon"><i class="ph ph-warning"></i></div>
+        <div>
+          <div class="alert-banner-title">Estoque crítico</div>
+          <div class="alert-banner-text">O estoque de {{ implode(', ', $criticalBloodTypes) }} está abaixo de {{ $criticalStockPercentage }}% da meta.</div>
+        </div>
       </div>
+      <a class="btn btn-primary" href="{{ route('hemocentro.alertas') }}">Emitir alerta</a>
     </div>
-    <button class="btn btn-primary"><a href="Hem_Alertas.blade.php">Emitir alerta</a></button>
-  </div>
+  @endif
 
   <section class="stock-grid">
-    <div class="stock-card">
-      <div class="stock-card-head">
-        <span class="blood-type">O-</span>
-        <span class="badge-sq">Crítico</span>
+    @foreach ($stockCards as $bloodType => $card)
+      <div class="stock-card">
+        <div class="stock-card-head">
+          <span class="blood-type">{{ $bloodType }}</span>
+          @if ($card['isCritical'])
+            <span class="badge-sq">Crítico</span>
+          @endif
+        </div>
+        <div class="stock-count"><span class="count-value">{{ $card['quantity'] }}</span><span class="count-unit">{{ $card['quantity'] === 1 ? 'bolsa' : 'bolsas' }}</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:{{ min(100, max(0, $card['percentage'])) }}%"></div></div>
+        <div class="stock-meta">
+          <span class="meta-left">Meta: {{ $card['target'] }}<br>bolsas</span>
+          <span class="meta-right">{{ $card['percentage'] }}% do<br>ideal</span>
+        </div>
+        @if ($card['expiring'] > 0)
+          <div class="stock-footer is-warning"><i class="ph ph-calendar-x"></i> {{ $card['expiring'] }} {{ $card['expiring'] === 1 ? 'bolsa' : 'bolsas' }} com validade em até 7 dias</div>
+        @else
+          <div class="stock-footer"><i class="ph ph-check-circle"></i> Nenhuma expiração próxima</div>
+        @endif
       </div>
-      <div class="stock-count"><span class="count-value">12</span><span class="count-unit">bolsas</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:15%"></div></div>
-      <div class="stock-meta">
-        <span class="meta-left">Meta: 80<br>bolsas</span>
-        <span class="meta-right">15% do<br>ideal</span>
-      </div>
-      <div class="stock-footer is-warning"><i class="ph ph-calendar-x"></i> 5 bolsas vencendo em 7 dias</div>
-    </div>
-
-    <div class="stock-card">
-      <div class="stock-card-head">
-        <span class="blood-type">O+</span>
-      </div>
-      <div class="stock-count"><span class="count-value">64</span><span class="count-unit">bolsas</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:64%"></div></div>
-      <div class="stock-meta">
-        <span class="meta-left">Meta: 100<br>bolsas</span>
-        <span class="meta-right">64% do<br>ideal</span>
-      </div>
-      <div class="stock-footer"><i class="ph ph-check-circle"></i> Nenhuma expiração próxima</div>
-    </div>
-
-    <div class="stock-card">
-      <div class="stock-card-head">
-        <span class="blood-type">A-</span>
-      </div>
-      <div class="stock-count"><span class="count-value">42</span><span class="count-unit">bolsas</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:42%"></div></div>
-      <div class="stock-meta">
-        <span class="meta-left">Meta: 100<br>bolsas</span>
-        <span class="meta-right">42% do<br>ideal</span>
-      </div>
-      <div class="stock-footer is-warning"><i class="ph ph-calendar-x"></i> 2 bolsas vencendo em 7 dias</div>
-    </div>
-
-    <div class="stock-card">
-      <div class="stock-card-head">
-        <span class="blood-type">A+</span>
-      </div>
-      <div class="stock-count"><span class="count-value">88</span><span class="count-unit">bolsas</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:88%"></div></div>
-      <div class="stock-meta">
-        <span class="meta-left">Meta: 100<br>bolsas</span>
-        <span class="meta-right">88% do<br>ideal</span>
-      </div>
-      <div class="stock-footer"><i class="ph ph-check-circle"></i> Nenhuma expiração próxima</div>
-    </div>
-
-    <div class="stock-card">
-      <div class="stock-card-head">
-        <span class="blood-type">B-</span>
-      </div>
-      <div class="stock-count"><span class="count-value">24</span><span class="count-unit">bolsas</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:48%"></div></div>
-      <div class="stock-meta">
-        <span class="meta-left">Meta: 50<br>bolsas</span>
-        <span class="meta-right">48% do<br>ideal</span>
-      </div>
-      <div class="stock-footer"><i class="ph ph-check-circle"></i> Nenhuma expiração próxima</div>
-    </div>
-
-    <div class="stock-card">
-      <div class="stock-card-head">
-        <span class="blood-type">B+</span>
-        <span class="badge-sq">Crítico</span>
-      </div>
-      <div class="stock-count"><span class="count-value">9</span><span class="count-unit">bolsas</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:12%"></div></div>
-      <div class="stock-meta">
-        <span class="meta-left">Meta: 75<br>bolsas</span>
-        <span class="meta-right">12% do<br>ideal</span>
-      </div>
-      <div class="stock-footer is-warning"><i class="ph ph-calendar-x"></i> 8 bolsas vencendo em 7 dias</div>
-    </div>
-
-    <div class="stock-card">
-      <div class="stock-card-head">
-        <span class="blood-type">AB-</span>
-        <span class="badge-sq">Crítico</span>
-      </div>
-      <div class="stock-count"><span class="count-value">4</span><span class="count-unit">bolsas</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:13%"></div></div>
-      <div class="stock-meta">
-        <span class="meta-left">Meta: 30<br>bolsas</span>
-        <span class="meta-right">13% do<br>ideal</span>
-      </div>
-      <div class="stock-footer"><i class="ph ph-check-circle"></i> Nenhuma expiração próxima</div>
-    </div>
-
-    <div class="stock-card">
-      <div class="stock-card-head">
-        <span class="blood-type">AB+</span>
-      </div>
-      <div class="stock-count"><span class="count-value">31</span><span class="count-unit">bolsas</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:77%"></div></div>
-      <div class="stock-meta">
-        <span class="meta-left">Meta: 40<br>bolsas</span>
-        <span class="meta-right">77% do<br>ideal</span>
-      </div>
-      <div class="stock-footer"><i class="ph ph-check-circle"></i> Nenhuma expiração próxima</div>
-    </div>
+    @endforeach
   </section>
 
   <section class="stock-bottom-grid">
 
     <div class="stock-side">
-      <div class="panel">
-        <h2 style="margin:0 0 14px;font-size:19px;">Movimentação</h2>
-        <div class="panel-select">Últimos 30 dias <i class="ph ph-caret-down"></i></div>
+      <div class="panel stock-movement">
+        <h2>Movimentação</h2>
+        <p>Bolsas coletadas nos últimos 30 dias</p>
 
-        <div class="bar-chart" style="height:150px;">
-          <div class="bar-col"><div class="bar" style="height:62%"></div></div>
-          <div class="bar-col"><div class="bar" style="height:94%"></div></div>
-          <div class="bar-col"><div class="bar" style="height:49%"></div></div>
-          <div class="bar-col"><div class="bar" style="height:100%"></div></div>
+        <div class="bar-chart" aria-hidden="true">
+          @foreach ($collections['periods'] as $period)
+            <div class="bar-col"><div class="bar" style="height:{{ round(max(0, $period['quantity']) * 100 / $collections['max'], 2) }}%"></div></div>
+          @endforeach
         </div>
         <div class="bar-labels">
-          <span>Sem 01</span>
-          <span>Sem 02</span>
-          <span>Sem 03</span>
-          <span>Sem 04</span>
-        </div>
-
-        <div class="chart-legend" style="margin-top:16px;">
-          <span class="legend-dot"></span> Entradas
-          <span class="legend-dot" style="margin-left:10px;"></span> Saídas
+          @foreach ($collections['periods'] as $period)
+            <span>{{ $period['start']->format('d/m') }}<br>–{{ $period['end']->format('d/m') }}<br><strong>{{ $period['quantity'] }}</strong></span>
+          @endforeach
         </div>
 
         <div class="totals-row">
           <div>
-            <span class="total-label">Total Entradas</span>
-            <span class="total-value">+124</span>
-          </div>
-          <div>
-            <span class="total-label">Total Saídas</span>
-            <span class="total-value">-98</span>
+            <span class="total-label">Total de bolsas coletadas</span>
+            <span class="total-value">{{ $collections['total'] }}</span>
           </div>
         </div>
       </div>
 
-      <a href="Hem_Triagem.blade.php" class="btn btn-primary btn-block"><i class="ph ph-flask"></i> Triagem de Bolsas</a>
+      <a href="{{ route('hemocentro.triagem') }}" class="btn btn-primary btn-block"><i class="ph ph-flask"></i> Triagem de Bolsas</a>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="inventario">
       <div class="panel-header">
         <h2>Inventário Detalhado</h2>
         <div class="panel-actions">
@@ -218,55 +124,60 @@
         </div>
       </div>
 
-      <table class="table">
-        <thead>
-          <tr>
-            <th>ID Bolsa</th>
-            <th>Tipo</th>
-            <th>Coleta</th>
-            <th>Validade</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="hospital-name">#O-88291</td>
-            <td><span class="type-pill"><i class="ph ph-drop"></i> O-</span></td>
-            <td>12/10/2023</td>
-            <td class="date-alert">19/10/2023</td>
-            <td><span class="status-dot"></span>Disponível</td>
-          </tr>
-          <tr>
-            <td class="hospital-name">#A+88302</td>
-            <td><span class="type-pill"><i class="ph ph-drop"></i> A+</span></td>
-            <td>15/10/2023</td>
-            <td>22/11/2023</td>
-            <td><span class="status-dot is-alert"></span><span class="status-text is-alert">Reservado</span></td>
-          </tr>
-          <tr>
-            <td class="hospital-name">#O+88315</td>
-            <td><span class="type-pill"><i class="ph ph-drop"></i> O+</span></td>
-            <td>16/10/2023</td>
-            <td class="date-alert">21/10/2023</td>
-            <td><span class="status-dot"></span>Disponível</td>
-          </tr>
-          <tr>
-            <td class="hospital-name">#O+88340</td>
-            <td><span class="type-pill"><i class="ph ph-drop"></i> O+</span></td>
-            <td>17/10/2023</td>
-            <td>24/11/2023</td>
-            <td><span class="status-dot"></span>Enviado</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="table-footer">
-        <span>Mostrando 1-10 de 20 bolsas em estoque</span>
-        <div class="pagination">
-          <button class="btn btn-outline" disabled>Anterior</button>
-          <button class="btn btn-outline">Próximo</button>
-        </div>
+      <div class="inventory-table">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">ID Bolsa</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Qtd.</th>
+              <th scope="col">Coleta</th>
+              <th scope="col">Validade</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse ($inventory as $bag)
+              <tr>
+                <td class="hospital-name">{{ $bag['isbt'] }}</td>
+                <td><span class="type-pill"><i class="ph ph-drop"></i> {{ $bag['bloodType'] }}</span></td>
+                <td>{{ $bag['quantity'] }}</td>
+                <td>{{ $bag['collectedOn'] ?? '—' }}</td>
+                <td @class(['date-alert' => $bag['expiryAlert']])>{{ $bag['expiresOn'] ?? '—' }}</td>
+                <td>
+                  <span @class(['status-dot', 'is-alert' => $bag['reserved']]) aria-hidden="true"></span><span @class(['status-text', 'is-alert' => $bag['reserved']])>{{ $bag['status'] }}</span>
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="6">{{ $inventory->total() === 0 ? 'Nenhuma bolsa cadastrada.' : 'Nenhuma bolsa nesta página.' }}</td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
       </div>
+
+      @if ($inventory->total() > 0)
+        <div class="table-footer">
+          @if ($inventory->isNotEmpty())
+            <span>Mostrando {{ $inventory->firstItem() }}–{{ $inventory->lastItem() }} de {{ $inventory->total() }} {{ $inventory->total() === 1 ? 'registro' : 'registros' }}</span>
+          @endif
+          @if ($inventory->hasPages())
+            <div class="pagination" role="navigation" aria-label="Paginação do inventário">
+              @if ($inventory->previousPageUrl())
+                <a class="btn btn-outline" href="{{ $inventory->previousPageUrl() }}" rel="prev">Anterior</a>
+              @else
+                <button class="btn btn-outline" type="button" disabled>Anterior</button>
+              @endif
+              @if ($inventory->nextPageUrl())
+                <a class="btn btn-outline" href="{{ $inventory->nextPageUrl() }}" rel="next">Próximo</a>
+              @else
+                <button class="btn btn-outline" type="button" disabled>Próximo</button>
+              @endif
+            </div>
+          @endif
+        </div>
+      @endif
     </div>
   </section>
 

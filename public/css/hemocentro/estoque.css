@@ -155,19 +155,20 @@
   flex-direction:column;
 }
 
-.panel-select{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  background:var(--bg);
-  border:1px solid var(--line);
-  border-radius:100px;
-  padding:7px 14px;
-  font-size:12.5px;
-  color:var(--ink);
-  margin-bottom:20px;
-  cursor:pointer;
+.stock-movement h2{
+  margin:0 0 6px;
+  font-size:19px;
 }
+
+.stock-movement p{
+  margin:0 0 20px;
+  color:var(--ink-soft);
+  font-size:12.5px;
+}
+
+.stock-movement .bar-chart{ height:150px; }
+.stock-movement .bar-chart,
+.stock-movement .bar-labels{ gap:6px; }
 
 .totals-row{
   display:flex;
@@ -245,6 +246,8 @@
 .status-text.is-alert{ color:var(--brand); font-weight:700; }
 
 .date-alert{ color:var(--brand); font-weight:700; }
+
+.inventory-table{ overflow-x:auto; }
 
 .table-footer{
   display:flex;

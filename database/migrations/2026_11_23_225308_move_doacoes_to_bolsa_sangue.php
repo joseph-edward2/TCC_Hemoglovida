@@ -23,6 +23,10 @@ return new class extends Migration
             $table->date('data_venc_bolsa')->nullable()->change();
         });
 
+        if (! Schema::hasTable('doacao')) {
+            return;
+        }
+
         DB::transaction(function (): void {
             DB::table('doacao')
                 ->leftJoin('agendamento', 'agendamento.protocolo_agendamento', '=', 'doacao.protocolo_agendamento')
@@ -42,8 +46,6 @@ return new class extends Migration
                     ])->all());
                 }, 'doacao.protocolo_agendamento', 'protocolo_agendamento');
         });
-
-  
     }
 
     /**
