@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HemocentroAtendimentoController;
 use App\Http\Controllers\HemocentroDashboardController;
 use App\Http\Controllers\HemocentroSessionController;
 use Illuminate\Support\Facades\Route;
@@ -30,7 +31,11 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
         Route::post('/sair', [HemocentroSessionController::class, 'destroy'])->name('logout');
         Route::view('/Hem_Agendamento.blade.php', 'hemocentro.Hem_Agendamento')->name('agendamento');
         Route::view('/Hem_Alertas.blade.php', 'hemocentro.Hem_Alertas')->name('alertas');
-        Route::view('/Hem_Atendimento.blade.php', 'hemocentro.Hem_Atendimento')->name('atendimento');
+        Route::get('/Hem_Atendimento.blade.php', [HemocentroAtendimentoController::class, 'index'])->name('atendimento');
+        Route::post('/atendimento/{protocolo}/confirmar-chegada', [HemocentroAtendimentoController::class, 'confirmarChegada'])
+            ->whereNumber('protocolo')->name('atendimento.chegada');
+        Route::post('/atendimento/{protocolo}/doacao-realizada', [HemocentroAtendimentoController::class, 'concluir'])
+            ->whereNumber('protocolo')->name('atendimento.concluir');
         Route::view('/Hem_Estoque.blade.php', 'hemocentro.Hem_Estoque')->name('estoque');
         Route::view('/Hem_Pedidos.blade.php', 'hemocentro.Hem_Pedidos')->name('pedidos');
         Route::get('/Hem_Tela_Inicial.blade.php', HemocentroDashboardController::class)->name('inicio');

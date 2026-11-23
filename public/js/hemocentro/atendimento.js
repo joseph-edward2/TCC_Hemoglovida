@@ -1,263 +1,160 @@
 const agendaEl = document.getElementById('agenda');
+const agendamentos = Array.from(agendaEl.querySelectorAll('.agenda__item'));
 const paginacaoEl = document.getElementById('paginacao');
-const linkTodos = document.getElementById('linkTodos');
 const btnConfirmarChegada = document.getElementById('btnConfirmarChegada');
 const btnDoacaoRealizada = document.getElementById('btnDoacaoRealizada');
+const atendimentoErro = document.getElementById('atendimentoErro');
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
 const badgeHorarioEl = document.getElementById('badgeHorario');
-const pacienteFotoEl = document.getElementById('pacienteFoto');
+const pacienteIniciaisEl = document.getElementById('pacienteIniciais');
 const pacienteNomeEl = document.getElementById('pacienteNome');
 const pacienteTipoEl = document.getElementById('pacienteTipo');
 const pacienteCpfEl = document.getElementById('pacienteCpf');
-const pacienteTagEl = document.getElementById('pacienteTag');
-const observacaoEl = document.getElementById('observacaoTexto');
-
 const passos = document.querySelectorAll('.stepper .step');
 const linhas = document.querySelectorAll('.stepper .step__line');
-
-const agendamentos = [
-  { nome: 'Maria Silva', horario: '08:00', status: 'Finalizado', etapa: 3,
-    tipo: 'A+', cpf: '318.*.-22', foto: null, tag: '', obs: 'Doação concluída sem intercorrências.' },
-  { nome: 'Jesse Pinkman', horario: '09:30', status: 'Em Andamento', statusOriginal: 'Agendado', etapa: 1,
-    tipo: 'O-', cpf: '452.*.-01', foto: '../../assets/JessePinkman.png', tag: 'Doador Frequente',
-    obs: 'Última doação há 4 meses. Sem restrições relatadas na triagem digital.' },
-  { nome: 'Ana Souza', horario: '10:15', status: 'Agendado', etapa: 1,
-    tipo: 'B+', cpf: '227.*.-35', foto: null, tag: 'Primeira Doação',
-    obs: 'Primeira doação. Orientar sobre hidratação e alimentação antes da coleta.' },
-  { nome: 'Carlos Pereira', horario: '11:00', status: 'Agendado', etapa: 1,
-    tipo: 'A-', cpf: '509.*.-48', foto: '../../assets/CarlosPereira.png', tag: 'Doador Frequente',
-    obs: 'Última doação há 6 meses. Sem restrições relatadas na triagem digital.' },
-  { nome: 'Fernanda Costa', horario: '13:30', status: 'Atrasado', etapa: 1,
-    tipo: 'AB+', cpf: '146.*.-70', foto: null, tag: '',
-    obs: 'Paciente em atraso. Confirmar se ainda deseja realizar a doação.' },
-  { nome: 'Pedro Almeida', horario: '14:45', status: 'Agendado', etapa: 1,
-    tipo: 'O+', cpf: '683.*.-19', foto: null, tag: 'Doador Frequente',
-    obs: 'Última doação há 5 meses. Sem restrições relatadas na triagem digital.' },
-  { nome: 'Juliana Ramos', horario: '16:00', status: 'Agendado', etapa: 1,
-    tipo: 'B-', cpf: '392.*.-84', foto: null, tag: 'Primeira Doação',
-    obs: 'Primeira doação. Sem restrições relatadas na triagem digital.' },
-  { nome: 'Roberto Nunes', horario: '17:30', status: 'Agendado', etapa: 1,
-    tipo: 'A+', cpf: '775.*.-63', foto: null, tag: '',
-    obs: 'Sem restrições relatadas na triagem digital.' }
-];
-
 const ITENS_POR_PAGINA = 6;
-const CORES_INICIAIS = ['#e2e0de', '#e2e0de', '#e2e0de', '#e2e0de', '#e2e0de', '#e2e0de'];
 
-let paginaAtual = 1;
+const situacoes = new Map([
+  ['agendado', { rotulo: 'Agendado', classe: 'agendado', etapa: 1 }],
+  ['atrasado', { rotulo: 'Atrasado', classe: 'atrasado', etapa: 1 }],
+  ['chegou', { rotulo: 'Em Andamento', classe: 'em-andamento', etapa: 2 }],
+  ['concluido', { rotulo: 'Finalizado', classe: 'finalizado', etapa: 3 }]
+]);
+const indisponivel = { rotulo: 'Indisponível', classe: 'agendado', etapa: 0 };
 
-let pacienteAtual = agendamentos.find(a => a.status === 'Em Andamento');
+let pacienteAtual = agendamentos.find(item => item.dataset.status === 'chegou')
+  ?? agendamentos.find(item => situacoes.get(item.dataset.status)?.etapa === 1)
+  ?? agendamentos[0];
+let paginaAtual = Math.floor(agendamentos.indexOf(pacienteAtual) / ITENS_POR_PAGINA) + 1;
+let enviando = false;
 
 function iniciaisDe(nome) {
   const partes = nome.trim().split(/\s+/);
-  const primeira = partes[0].charAt(0);
-  const ultima = partes[partes.length - 1].charAt(0);
-  return (primeira + ultima).toUpperCase();
+  return (partes[0].charAt(0) + partes.at(-1).charAt(0)).toUpperCase();
 }
-
-function fotoPadrao(nome) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="84">
-    <rect width="100%" height="100%" fill="#e2e0de"/>
-    <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle"
-      font-family="sans-serif" font-size="22" font-weight="700" fill="#a50021">${iniciaisDe(nome)}</text>
-  </svg>`;
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-}
-
-const STATUS_CLASSE = {
-  'Agendado': 'badge-status--agendado',
-  'Em Andamento': 'badge-status--em-andamento',
-  'Atrasado': 'badge-status--atrasado',
-  'Finalizado': 'badge-status--finalizado'
-};
 
 function renderizarAgenda() {
   const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
-  const itensPagina = agendamentos.slice(inicio, inicio + ITENS_POR_PAGINA);
+  agendamentos.forEach((item, indice) => {
+    item.hidden = indice < inicio || indice >= inicio + ITENS_POR_PAGINA;
+    item.classList.toggle('agenda__item--atual', item === pacienteAtual);
+    item.setAttribute('aria-pressed', String(item === pacienteAtual));
+    item.querySelector('.agenda__iniciais').textContent = iniciaisDe(item.querySelector('.agenda__nome').textContent);
 
-  agendaEl.innerHTML = itensPagina.map((item, index) => {
-    const indiceGlobal = inicio + index;
-    const cor = CORES_INICIAIS[indiceGlobal % CORES_INICIAIS.length];
-    const ehAtual = item === pacienteAtual;
-    const clicavel = !ehAtual && item.status !== 'Finalizado';
-
-    const classes = ['agenda__item'];
-    if (ehAtual) classes.push('agenda__item--atual');
-    if (clicavel) classes.push('agenda__item--clicavel');
-
-    const atributos = clicavel
-      ? `data-indice="${indiceGlobal}" role="button" tabindex="0" title="Atender ${item.nome}"`
-      : '';
-
-    return `
-      <li class="${classes.join(' ')}" ${atributos}>
-        <span class="agenda__iniciais" style="background-color: ${cor}">${iniciaisDe(item.nome)}</span>
-        <span class="agenda__nome">${item.nome}</span>
-        <span class="agenda__horario">${item.horario}</span>
-        <span class="badge-status ${STATUS_CLASSE[item.status] || ''}">${item.status}</span>
-      </li>
-    `;
-  }).join('');
+    const situacao = situacoes.get(item.dataset.status) ?? indisponivel;
+    const badge = item.querySelector('.badge-status');
+    badge.className = 'badge-status badge-status--' + situacao.classe;
+    badge.textContent = situacao.rotulo;
+  });
 
   renderizarPaginacao();
 }
 
 function renderizarPaginacao() {
   const totalPaginas = Math.ceil(agendamentos.length / ITENS_POR_PAGINA);
+  if (totalPaginas <= 1) return;
 
-  if (totalPaginas <= 1) {
-    paginacaoEl.innerHTML = '';
-    return;
+  let html = `<button type="button" class="paginacao__botao" data-pagina="${paginaAtual - 1}" aria-label="Página anterior" ${paginaAtual === 1 ? 'disabled' : ''}>&#8249;</button>`;
+
+  for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+    const ativa = pagina === paginaAtual;
+    html += `<button type="button" class="paginacao__botao${ativa ? ' paginacao__botao--ativo' : ''}" data-pagina="${pagina}" ${ativa ? 'aria-current="page"' : ''}>${pagina}</button>`;
   }
 
-  let html = `<button class="paginacao__botao" data-pagina="anterior" ${paginaAtual === 1 ? 'disabled' : ''}>&#8249;</button>`;
-
-  for (let i = 1; i <= totalPaginas; i++) {
-    const ativo = i === paginaAtual ? ' paginacao__botao--ativo' : '';
-    html += `<button class="paginacao__botao${ativo}" data-pagina="${i}">${i}</button>`;
-  }
-
-  html += `<button class="paginacao__botao" data-pagina="proxima" ${paginaAtual === totalPaginas ? 'disabled' : ''}>&#8250;</button>`;
-
+  html += `<button type="button" class="paginacao__botao" data-pagina="${paginaAtual + 1}" aria-label="Próxima página" ${paginaAtual === totalPaginas ? 'disabled' : ''}>&#8250;</button>`;
   paginacaoEl.innerHTML = html;
 }
 
-paginacaoEl.addEventListener('click', (event) => {
-  const botao = event.target.closest('.paginacao__botao');
-  if (!botao || botao.disabled) return;
-
-  const totalPaginas = Math.ceil(agendamentos.length / ITENS_POR_PAGINA);
-  const acao = botao.dataset.pagina;
-
-  if (acao === 'anterior') paginaAtual--;
-  else if (acao === 'proxima') paginaAtual++;
-  else paginaAtual = Number(acao);
-
-  if (paginaAtual < 1) paginaAtual = 1;
-  if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
-
-  renderizarAgenda();
-});
-
 function renderizarPaciente() {
-  const p = pacienteAtual;
-
-  badgeHorarioEl.textContent = p.horario;
-  pacienteFotoEl.src = p.foto || fotoPadrao(p.nome);
-  pacienteFotoEl.alt = 'Foto de ' + p.nome;
-  pacienteNomeEl.textContent = p.nome;
-  pacienteTipoEl.textContent = 'Tipo Sanguíneo: ' + p.tipo;
-  pacienteCpfEl.textContent = 'CPF: ' + p.cpf;
-  pacienteTagEl.textContent = p.tag;
-  pacienteTagEl.style.display = p.tag ? '' : 'none';
-  observacaoEl.textContent = p.obs;
+  const nome = pacienteAtual.querySelector('.agenda__nome').textContent;
+  badgeHorarioEl.textContent = pacienteAtual.querySelector('.agenda__horario').textContent;
+  pacienteIniciaisEl.textContent = iniciaisDe(nome);
+  pacienteNomeEl.textContent = nome;
+  pacienteTipoEl.textContent = 'Tipo Sanguíneo: ' + pacienteAtual.dataset.tipo;
+  pacienteCpfEl.textContent = 'CPF: ' + pacienteAtual.dataset.cpf;
 }
 
-const USAR_API = false;
-
-let enviando = false;
-
 function renderizarPassos() {
-  const etapa = pacienteAtual.etapa;
+  const { etapa } = situacoes.get(pacienteAtual.dataset.status) ?? indisponivel;
 
-  passos.forEach((passo, i) => {
+  passos.forEach((passo, indice) => {
     const circulo = passo.querySelector('.step__circle');
     const rotulo = passo.querySelector('.step__label');
-    const concluido = i < etapa;
-    const atual = i === etapa;
+    const concluido = indice < etapa;
+    const atual = indice === etapa;
 
     circulo.classList.toggle('step__circle--done', concluido);
     circulo.classList.toggle('step__circle--current', atual);
-    circulo.innerHTML = concluido ? '&#10003;' : '';
-
+    circulo.textContent = concluido ? '✓' : '';
     rotulo.classList.toggle('step__label--current', atual);
   });
 
-  linhas.forEach((linha, i) => {
-    linha.classList.toggle('step__line--done', i < etapa);
+  linhas.forEach((linha, indice) => {
+    linha.classList.toggle('step__line--done', indice < etapa);
   });
 
   btnConfirmarChegada.disabled = enviando || etapa !== 1;
   btnDoacaoRealizada.disabled = enviando || etapa !== 2;
 }
 
-async function enviarAcao(endpoint, payload) {
-  if (!USAR_API) return true;
+async function executarEtapa(url) {
+  enviando = true;
+  atendimentoErro.hidden = true;
+  renderizarPassos();
 
   try {
-    const resposta = await fetch('https://api.exemplo.com/' + endpoint, {
+    const resposta = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrfToken }
     });
 
-    if (!resposta.ok) throw new Error('Falha na solicitação.');
+    if (!resposta.ok) {
+      atendimentoErro.textContent = resposta.status === 409
+        ? 'O status do agendamento mudou. Atualize a página e tente novamente.'
+        : 'Não foi possível salvar o atendimento. Tente novamente.';
+      atendimentoErro.hidden = false;
+      return;
+    }
 
-    console.log('Ação enviada:', payload);
-    return true;
-  } catch (erro) {
-    alert('Não foi possível concluir a ação. Tente novamente.');
-    return false;
-  }
-}
-
-async function executarEtapa(endpoint, proximaEtapa, aoConcluir) {
-  enviando = true;
-  renderizarPassos();
-
-  const ok = await enviarAcao(endpoint, { paciente: pacienteAtual.nome });
-
-  enviando = false;
-  if (ok) {
-    pacienteAtual.etapa = proximaEtapa;
-    if (aoConcluir) aoConcluir();
-  }
-  renderizarPassos();
-}
-
-btnConfirmarChegada.addEventListener('click', () => {
-  if (pacienteAtual.etapa !== 1 || enviando) return;
-  executarEtapa('atendimento/confirmar-chegada', 2);
-});
-
-
-btnDoacaoRealizada.addEventListener('click', () => {
-  if (pacienteAtual.etapa !== 2 || enviando) return;
-  executarEtapa('atendimento/doacao-realizada', 3, () => {
-    pacienteAtual.status = 'Finalizado';
+    const { status } = await resposta.json();
+    pacienteAtual.dataset.status = status;
     renderizarAgenda();
-  });
+  } catch {
+    atendimentoErro.textContent = 'Não foi possível salvar o atendimento. Tente novamente.';
+    atendimentoErro.hidden = false;
+  } finally {
+    enviando = false;
+    renderizarPassos();
+  }
+}
+
+function tratarSelecaoAgenda(event) {
+  const item = event.target.closest('.agenda__item');
+  if (enviando || !item) return;
+
+  pacienteAtual = item;
+  atendimentoErro.hidden = true;
+  renderizarPaciente();
+  renderizarAgenda();
+  renderizarPassos();
+}
+
+paginacaoEl.addEventListener('click', (event) => {
+  const botao = event.target.closest('.paginacao__botao');
+  if (!botao || botao.disabled) return;
+
+  paginaAtual = Number(botao.dataset.pagina);
+  renderizarAgenda();
 });
 
-function trocarDoador(indice) {
-  if (enviando) return;
-
-  const novo = agendamentos[indice];
-  if (!novo || novo === pacienteAtual || novo.status === 'Finalizado') return;
-
-  const anterior = pacienteAtual;
-  anterior.status = anterior.etapa === 3 ? 'Finalizado' : (anterior.statusOriginal || 'Agendado');
-
-  novo.statusOriginal = novo.status; 
-  novo.status = 'Em Andamento';
-  pacienteAtual = novo;
-
-  renderizarPaciente();
-  renderizarPassos();
-  renderizarAgenda();
-}
-
-function tratarCliqueAgenda(event) {
-  const item = event.target.closest('.agenda__item--clicavel');
-  if (!item) return;
-  trocarDoador(Number(item.dataset.indice));
-}
-
-agendaEl.addEventListener('click', tratarCliqueAgenda);
+btnConfirmarChegada.addEventListener('click', () => executarEtapa(pacienteAtual.dataset.chegada));
+btnDoacaoRealizada.addEventListener('click', () => executarEtapa(pacienteAtual.dataset.concluir));
+agendaEl.addEventListener('click', tratarSelecaoAgenda);
 agendaEl.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
-    tratarCliqueAgenda(event);
+    tratarSelecaoAgenda(event);
   }
 });
 

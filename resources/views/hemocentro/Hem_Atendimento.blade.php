@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Hemoglovida | Atendimento</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
@@ -54,51 +55,56 @@
         <section class="card card--atendimento">
           <div class="card__header">
             <h2 class="card__title">Atendimento em Curso</h2>
-            <span class="badge-time" id="badgeHorario">09:30</span>
+            @if ($agendamentos->isNotEmpty())
+              <span class="badge-time" id="badgeHorario"></span>
+            @endif
           </div>
 
-          <div class="paciente">
-            <img class="paciente__foto" id="pacienteFoto" src="../../assets/JessePinkman.png" alt="Foto do paciente">
-            <div class="paciente__info">
-              <p class="paciente__nome" id="pacienteNome">Jesse Pinkman</p>
-              <div class="paciente__dados">
-                <span id="pacienteTipo">Tipo Sanguíneo: O-</span>
-                <span id="pacienteCpf">CPF: 452.*.-01</span>
+          @if ($agendamentos->isEmpty())
+            <p>Nenhum atendimento para exibir.</p>
+          @else
+            <div class="paciente">
+              <span class="paciente__foto" id="pacienteIniciais" aria-hidden="true"></span>
+              <div class="paciente__info">
+                <p class="paciente__nome" id="pacienteNome"></p>
+                <div class="paciente__dados">
+                  <span id="pacienteTipo"></span>
+                  <span id="pacienteCpf"></span>
+                </div>
               </div>
-              <span class="tag" id="pacienteTag">Doador Frequente</span>
             </div>
-          </div>
 
-          <div class="stepper">
-            <div class="step">
-              <span class="step__circle step__circle--done">&#10003;</span>
-              <span class="step__label">Agendado</span>
+            <div class="stepper">
+              <div class="step">
+                <span class="step__circle"></span>
+                <span class="step__label">Agendado</span>
+              </div>
+              <span class="step__line"></span>
+              <div class="step">
+                <span class="step__circle"></span>
+                <span class="step__label">Chegou</span>
+              </div>
+              <span class="step__line"></span>
+              <div class="step">
+                <span class="step__circle"></span>
+                <span class="step__label">Concluído</span>
+              </div>
             </div>
-            <span class="step__line step__line--done"></span>
-            <div class="step">
-              <span class="step__circle step__circle--current"></span>
-              <span class="step__label step__label--current">Chegou</span>
-            </div>
-            <span class="step__line"></span>
-            <div class="step">
-              <span class="step__circle"></span>
-              <span class="step__label">Concluído</span>
-            </div>
-          </div>
 
-          <div class="card__actions">
-            <button class="btn btn-primary" id="btnConfirmarChegada">Confirmar Chegada</button>
-            <button class="btn btn-outline" id="btnDoacaoRealizada">Doação Realizada</button>
-          </div>
+            <div class="card__actions">
+              <button type="button" class="btn btn-primary" id="btnConfirmarChegada" disabled>Confirmar Chegada</button>
+              <button type="button" class="btn btn-outline" id="btnDoacaoRealizada" disabled>Doação Realizada</button>
+            </div>
+            <p id="atendimentoErro" role="alert" hidden></p>
+          @endif
         </section>
 
         <section class="card card--observacoes">
           <div class="card__header">
             <h2 class="card__title">Observações Médicas</h2>
-            <a href="#" class="card__link">Ver Histórico Completo</a>
           </div>
-          <div class="alerta" id="observacaoTexto">
-            Última doação há 4 meses. Sem restrições relatadas na triagem digital.
+          <div class="alerta">
+            Nenhuma observação médica disponível.
           </div>
         </section>
 
@@ -108,9 +114,24 @@
 
         <section class="card card--agenda">
           <h2 class="card__title">Agendamentos de Hoje</h2>
-          <ul class="agenda" id="agenda"></ul>
+          <ul class="agenda" id="agenda">
+            @forelse ($agendamentos as $agendamento)
+              <li class="agenda__item agenda__item--clicavel" role="button" tabindex="0"
+                  data-status="{{ $agendamento['status'] }}"
+                  data-tipo="{{ $agendamento['tipo'] }}"
+                  data-cpf="{{ $agendamento['cpf'] }}"
+                  data-chegada="{{ route('hemocentro.atendimento.chegada', $agendamento['protocolo'], false) }}"
+                  data-concluir="{{ route('hemocentro.atendimento.concluir', $agendamento['protocolo'], false) }}">
+                <span class="agenda__iniciais" aria-hidden="true"></span>
+                <span class="agenda__nome">{{ $agendamento['nome'] }}</span>
+                <span class="agenda__horario">{{ $agendamento['horario'] }}</span>
+                <span class="badge-status"></span>
+              </li>
+            @empty
+              <li>Nenhum agendamento para hoje.</li>
+            @endforelse
+          </ul>
           <div class="paginacao" id="paginacao"></div>
-          <a href="#" class="agenda__todos" id="linkTodos"></a>
         </section>
 
       </div>
@@ -118,6 +139,8 @@
     </div>
   </main>
 
- <script src="{{ asset('js/hemocentro/atendimento.js') }}"></script>
+  @if ($agendamentos->isNotEmpty())
+    <script src="{{ asset('js/hemocentro/atendimento.js') }}"></script>
+  @endif
 </body>
 </html>
