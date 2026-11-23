@@ -32,7 +32,8 @@
     </section>
 
     <section class="login-card">
-      <form id="loginForm" method="POST" novalidate>
+      <form id="loginForm" method="POST" action="{{ route('hemocentro.login.store') }}" novalidate>
+        @csrf
         <div class="field">
           <label class="field__label" for="login">Login</label>
           <input
@@ -40,7 +41,7 @@
             type="text"
             id="login"
             name="login"
-            placeholder="00.000.000/0001-00"
+            placeholder="CNES ou CPF"
             autocomplete="username"
             maxlength="18"
             inputmode="numeric">
@@ -53,7 +54,7 @@
               class="field__input field__input--password"
               type="password"
               id="senha"
-              name="senha"
+              name="password"
               placeholder="••••••••"
               autocomplete="current-password">
             <button type="button" class="field__toggle" id="toggleSenha" aria-label="Mostrar senha">
@@ -65,10 +66,10 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" href="Hem_Tela_Inicial.blade.php">Entrar</button>
+        <button type="submit" class="btn btn-primary">Entrar</button>
       </form>
 
-      <p class="msg" id="msg" hidden></p>
+      <p class="msg{{ $errors->any() ? ' msg--error' : '' }}" id="msg" role="alert" @if (! $errors->any()) hidden @endif>{{ $errors->first() }}</p>
     </section>
 
   </main>

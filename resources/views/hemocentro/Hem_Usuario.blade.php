@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hemoglovida — Minha Conta</title>
-<link rel="stylesheet" href="{{ asset('css/hemocentro/usuario.css') }}">
 <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hemocentro/conta.css') }}">
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 </head>
 <body>
@@ -99,7 +99,10 @@
 
   <div class="bottom-actions">
     <button class="btn-solid" id="saveBtn">Salvar Alterações</button>
-    <button class="btn-outline-danger" id="deleteAccountBtn"><i class="ph ph-prohibit"></i> Encerrar Conta</button>
+    <form method="POST" action="{{ route('hemocentro.logout') }}">
+      @csrf
+      <button type="submit" class="btn-logout"><i class="ph ph-sign-out" aria-hidden="true"></i> Sair</button>
+    </form>
   </div>
 </main>
 
@@ -123,21 +126,8 @@
   </div>
 </div>
 
-<div class="overlay" id="deleteOverlay">
-  <div class="modal">
-    <button class="close" id="deleteClose"><i class="ph ph-x"></i></button>
-    <div class="modal-icon"><i class="ph ph-warning"></i></div>
-    <h2>Encerrar Conta</h2>
-    <p class="modal-text">Essa ação é permanente e removerá seu acesso ao painel do hemocentro. Tem certeza que deseja continuar?</p>
-    <div class="modal-actions">
-      <button class="btn-outline" id="cancelDelete">Cancelar</button>
-      <button class="btn-danger" id="confirmDelete">Sim, encerrar conta</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
-<script src="{{ asset('css/hemocentro/usuario.css') }}"></script>
+<script src="{{ asset('js/hemocentro/conta.js') }}"></script>
 </body>
 </html>

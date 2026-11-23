@@ -11,36 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pedido', function (Blueprint $table) {
-            $table->id();
-            $table->char('quantidade_pedido', 4);
-            $table->enum('status_pedido', ['pendente', 'em andamento', 'concluido', 'incompleto']);
-            $table->dateTime('data_hora_pedido');
-            $table->string('descricao_pedido', 1000);
-            $table->string('url_requisicao_transfusao', 255)->unique();
+        Schema::create('pedido', function (Blueprint $table): void {
+            $table->id('id_ped');
+            $table->char('cnpj_hosp', 14);
+            $table->char('cnes_hem', 7);
+            $table->unsignedBigInteger('cod_reg_fun');
+            $table->text('desc_ped');
+            $table->dateTime('data_hora_ped')->useCurrent();
+            $table->string('status_ped', 30)->default('pendente');
+            $table->integer('quant_ped');
+            $table->string('url_requisicao_transfusao_ped', 255)->nullable();
 
-            $table->char('cnpj_hospital', 14);
-            $table->char('cnes_hemocentro', 7);
-            $table->char('login_funcionario', 16);
-
-            $table->foreign('cnpj_hospital')
-                ->references('cnpj_hospital')->on('hospital')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-
-            $table->foreign('cnes_hemocentro')
-                ->references('cnes_hemocentro')->on('hemocentro')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-            
-            $table->foreign('login_funcionario')
-                ->references('login_funcionario')->on('funcionario')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-
-            $table->timestamps();
+            $table->foreign('cnpj_hosp', 'fk_pedido_hospital')
+                ->references('cnpj_hosp')->on('hospital');
+            $table->foreign('cnes_hem', 'fk_pedido_hemocentro')
+                ->references('cnes_hem')->on('hemocentro');
+            $table->foreign('cod_reg_fun', 'fk_pedido_funcionario')
+                ->references('cod_reg_fun')->on('funcionario');
         });
     }
 

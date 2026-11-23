@@ -11,19 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('doador', function (Blueprint $table) {
+        Schema::create('doador', function (Blueprint $table): void {
             $table->char('cpf_doador', 11)->primary();
-            $table->char('sus_doador', 15)->unique();
-            $table->string('nome_doador', 100);
-            $table->string('email_doador', 100);
-            $table->string('senha_doador',100);
-            $table->string('telefone_doador', 20);
-            $table->string('tipo_sanguineo_doador', 3);
-            $table->enum('sexo_doador', ['M', 'F']);
-            $table->string('endereco_doador', 200);
+            $table->string('nome_doador', 150);
+            $table->string('email_doador', 150)->unique();
+            $table->string('senha_doador', 255);
+            $table->string('fone_doador', 20);
+            $table->string('tipo_sanguineo', 3);
+            $table->string('endereco_doador', 255)->nullable();
+            $table->char('sexo_doador', 1)->nullable();
             $table->date('data_nasc_doador');
-            $table->string('peso_doador', 3);
-            $table->timestamps();
         });
     }
 

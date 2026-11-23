@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Funcionario;
+use App\Models\Hemocentro;
 use App\Models\User;
 
 return [
@@ -42,6 +44,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'hemocentro' => [
+            'driver' => 'session',
+            'provider' => 'hemocentros',
+        ],
+        'funcionario' => [
+            'driver' => 'session',
+            'provider' => 'funcionarios',
+        ],
     ],
 
     /*
@@ -65,6 +75,14 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+        'hemocentros' => [
+            'driver' => 'eloquent',
+            'model' => Hemocentro::class,
+        ],
+        'funcionarios' => [
+            'driver' => 'eloquent',
+            'model' => Funcionario::class,
         ],
 
         // 'users' => [

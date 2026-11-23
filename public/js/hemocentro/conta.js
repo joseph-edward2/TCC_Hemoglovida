@@ -68,14 +68,3 @@ document.getElementById('savePasswordBtn').addEventListener('click', ()=>{
 document.getElementById('saveBtn').addEventListener('click', ()=>{
   showToast('Alterações salvas com sucesso!');
 });
-
-const deleteOverlay = document.getElementById('deleteOverlay');
-document.getElementById('deleteAccountBtn').addEventListener('click', ()=> deleteOverlay.classList.add('show'));
-document.getElementById('deleteClose').addEventListener('click', ()=> deleteOverlay.classList.remove('show'));
-document.getElementById('cancelDelete').addEventListener('click', ()=> deleteOverlay.classList.remove('show'));
-deleteOverlay.addEventListener('click', (e)=>{ if(e.target === deleteOverlay) deleteOverlay.classList.remove('show'); });
-
-document.getElementById('confirmDelete').addEventListener('click', ()=>{
-  deleteOverlay.classList.remove('show');
-  showToast('Conta encerrada com sucesso.');
-});

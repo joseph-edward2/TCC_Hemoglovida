@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hospital', function (Blueprint $table) {
-            $table->char('cnpj_hospital', 14)->primary();
-            $table->char('cnes_hospital', 7)->unique();
-            $table->string('nome_hospital', 100);
-            $table->string('endereco_hospital', 200);
-            $table->string('contato_hospital', 255);
-            $table->string('senha_hospital', 100);
-            $table->timestamps();
+        Schema::create('hospital', function (Blueprint $table): void {
+            $table->char('cnpj_hosp', 14)->primary();
+            $table->char('cnes_hosp', 7)->unique();
+            $table->string('nome_hosp', 150);
+            $table->string('contato_hosp', 20);
+            $table->string('endereco_hosp', 255);
+            $table->string('senha_hosp', 255);
         });
     }
 

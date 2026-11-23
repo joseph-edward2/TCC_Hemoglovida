@@ -11,26 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('agendamento', function (Blueprint $table) {
-            $table->char('protocolo_agendamento', 36)->primary();
-            $table->dateTime('data_hora_agendamento');
-            $table->enum('status_agendamento', ['pendente', 'confirmado', 'cancelado', 'faltou']);
-            $table->enum('status_triagem_agendamento', ['aprovado', 'reprovado', 'pendente']);
-
-            $table->char('cnes_hemocentro', 7);
+        Schema::create('agendamento', function (Blueprint $table): void {
+            $table->id('protocolo_agendamento');
             $table->char('cpf_doador', 11);
+            $table->char('cnes_hem', 7);
+            $table->unsignedBigInteger('id_evento');
+            $table->dateTime('data_hora_agendamento');
+            $table->dateTime('data_hora_coleta')->nullable();
+            $table->string('status_agendamento', 30)->default('agendado');
+            $table->string('status_bolsa_doacao', 30)->nullable();
+            $table->decimal('volume_ml_doacao', 6, 2)->nullable();
 
-            $table->foreign('cnes_hemocentro')
-                ->references('cnes_hemocentro')->on('hemocentro')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-            $table->foreign('cpf_doador')
-                ->references('cpf_doador')->on('doador')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-            $table->timestamps();
+            $table->foreign('cpf_doador', 'fk_agendamento_doador')
+                ->references('cpf_doador')->on('doador');
+            $table->foreign('cnes_hem', 'fk_agendamento_hemocentro')
+                ->references('cnes_hem')->on('hemocentro');
+            $table->foreign('id_evento', 'fk_agendamento_evento')
+                ->references('id_evento')->on('evento');
+            $table->unique(['cpf_doador', 'data_hora_agendamento'], 'uq_doador_horario');
         });
     }
 
