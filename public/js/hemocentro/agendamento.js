@@ -8,39 +8,32 @@
   const DIAS  = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
   const LINHA_DIA = [1, 2, 3, 4, 5, 6, 0];
 
+  const diaUtil = { open: true, start: '07:00', end: '18:00', cap: 60 };
   const state = {
-    pattern: [
-      { open: false, start: '12:00 AM', end: '12:00 AM', cap: 0 },
-      { open: true,  start: '07:00 AM', end: '06:00 PM', cap: 60 },
-      { open: true,  start: '07:00 AM', end: '06:00 PM', cap: 60 },
-      { open: true,  start: '07:00 AM', end: '06:00 PM', cap: 60 },
-      { open: true,  start: '07:00 AM', end: '06:00 PM', cap: 60 },
-      { open: true,  start: '07:00 AM', end: '06:00 PM', cap: 60 },
-      { open: true,  start: '07:00 AM', end: '12:00 PM', cap: 30 },
+    pattern: agenda.settings?.pattern ?? [
+      { open: false, start: '00:00', end: '00:00', cap: 0 },
+      ...Array.from({ length: 5 }, () => ({ ...diaUtil })),
+      { ...diaUtil, end: '12:00', cap: 30 },
     ],
-    overrides: {
-      '2026-09-12': { open: true, horarios: [
-        { start: '08:00', end: '09:00', vagas: 5,  active: true },
-        { start: '09:00', end: '10:00', vagas: 10, active: true },
-        { start: '10:00', end: '11:00', vagas: 8,  active: true },
-      ] },
-    },
-    blocked: [],
+    overrides: Object.fromEntries((agenda.settings?.overrides ?? []).map(({ date, ...day }) => [date, day])),
+    blocked: agenda.settings?.blocked ?? [],
   };
 
-  let view = { ano: 2026, mes: 9 }; 
-  let selecionado = '2026-09-12';
+  let selecionado = agenda.date;
+  const [anoInicial, mesInicial] = selecionado.split('-').map(Number);
+  let view = { ano: anoInicial, mes: mesInicial - 1 };
+  let agendamentos = agenda.bookings;
+  let versao = agenda.revision;
+  const painel = $('.dashboard');
 
   const pad = (n) => String(n).padStart(2, '0');
   const chave = (a, m, d) => `${a}-${pad(m + 1)}-${pad(d)}`;
   const diaSemana = (a, m, d) => new Date(a, m, d).getDay();
 
   function paraMinutos(str) {
-    const m = /^(\d{1,2}):(\d{2})\s*([AP]M)$/i.exec((str || '').trim());
-    if (!m) return null;
-    let h = parseInt(m[1], 10) % 12;
-    if (/pm/i.test(m[3])) h += 12;
-    return h * 60 + parseInt(m[2], 10);
+    if (!str) return null;
+    const [hora, minuto] = str.split(':').map(Number);
+    return hora * 60 + minuto;
   }
   const paraHora = (min) => `${pad(Math.floor(min / 60))}:${pad(min % 60)}`;
 
@@ -49,7 +42,7 @@
     const ini = paraMinutos(p.start);
     const fim = paraMinutos(p.end);
     if (ini === null || fim === null || fim <= ini) return [];
-    const slots = Math.max(1, Math.round((fim - ini) / 60));
+    const slots = Math.max(1, Math.ceil((fim - ini) / 60));
     const base = Math.floor(p.cap / slots);
     let resto = p.cap - base * slots;
     const lista = [];
@@ -79,6 +72,18 @@
     return state.overrides[data];
   }
 
+  function ocupadosNoHorario(data, horario) {
+    return Object.entries(agendamentos[data] ?? {})
+      .filter(([hora]) => hora >= horario.start && hora < horario.end)
+      .reduce((total, [, quantidade]) => total + quantidade, 0);
+  }
+
+  function vagasLivres(data, config) {
+    if (!config.open) return 0;
+    return config.horarios.filter((h) => h.active)
+      .reduce((total, h) => total + Math.max(0, h.vagas - ocupadosNoHorario(data, h)), 0);
+  }
+
   function desenharCalendario() {
     const grid = $('.calendar-grid');
     $('.calendar-header h2').textContent = `${MESES[view.mes]} ${view.ano}`;
@@ -96,7 +101,7 @@
       } else {
         const c = configDoDia(data);
         if (data === selecionado) cel.classList.add('is-selected');
-        if (c.bloqueado || !c.open) {
+        if (vagasLivres(data, c) === 0) {
           cel.classList.add('is-indisponivel');
         } else {
           const dot = document.createElement('span');
@@ -109,13 +114,25 @@
     }
   }
 
-  function mudarMes(delta) {
-    let { ano, mes } = view;
-    mes += delta;
-    if (mes < 0) { mes = 11; ano -= 1; }
-    if (mes > 11) { mes = 0; ano += 1; }
-    view = { ano, mes };
-    desenharCalendario();
+  async function mudarMes(delta) {
+    const data = new Date(view.ano, view.mes + delta, 1);
+    const primeiroDia = chave(data.getFullYear(), data.getMonth(), 1);
+    const url = new URL(painel.dataset.calendarUrl);
+    url.searchParams.set('mes', primeiroDia.slice(0, 7));
+    const botoes = $$('.calendar-nav button');
+    botoes.forEach((btn) => { btn.disabled = true; });
+    try {
+      const resposta = await fetch(url, { headers: { Accept: 'application/json' } });
+      if (!resposta.ok) throw new Error();
+      const resultado = await resposta.json();
+      agendamentos = resultado.bookings;
+      view = { ano: data.getFullYear(), mes: data.getMonth() };
+      selecionar(primeiroDia);
+    } catch {
+      alert('Não foi possível carregar os agendamentos do mês.');
+    } finally {
+      botoes.forEach((btn) => { btn.disabled = false; });
+    }
   }
 
   function selecionar(data) {
@@ -143,7 +160,7 @@
     $$('.horario-vagas').forEach((i) => { i.disabled = !v; });
     $$('.horario-row .switch input').forEach((i) => { i.disabled = !v; });
     $$('.horario-remove').forEach((b) => { b.disabled = !v; });
-    $('.btn-dashed').disabled = !v;
+    $('.btn-dashed').disabled = !v || configDoDia(selecionado).horarios.at(-1)?.end === '23:59';
   }
 
   function desenharHorarios(c) {
@@ -160,7 +177,7 @@
       row.className = 'horario-row';
       row.dataset.i = i;
       row.innerHTML = `
-        <div class="horario-time">${h.start} - ${h.end}<small>Intervalo de 1 hora</small></div>
+        <div class="horario-time">${h.start} - ${h.end}<small>${ocupadosNoHorario(selecionado, h)} agendamento(s)</small></div>
         <input class="horario-vagas" type="text" value="${h.vagas}">
         <label class="switch"><input type="checkbox" ${h.active ? 'checked' : ''}><span class="track"></span></label>
         <button type="button" class="horario-remove" title="Remover" style="border:none;background:none;color:var(--brand);cursor:pointer;font-size:14px;">✕</button>
@@ -175,7 +192,8 @@
     const total = (c.open && !c.bloqueado)
       ? c.horarios.filter((h) => h.active).reduce((s, h) => s + (Number(h.vagas) || 0), 0)
       : 0;
-    $('.day-config-subhead .total').innerHTML = `Total: ${total}<br>vagas`;
+    const ocupados = Object.values(agendamentos[selecionado] ?? {}).reduce((soma, n) => soma + n, 0);
+    $('.day-config-subhead .total').innerHTML = `${total} vagas no total<br>${ocupados} agendamento(s)<br>${vagasLivres(selecionado, c)} vagas livres`;
   }
 
   $('.toggle-box .switch input').addEventListener('change', (e) => {
@@ -206,6 +224,7 @@
       h.active = e.target.checked;
     }
     atualizarTotal();
+    desenharCalendario();
   });
   $('.horario-list').addEventListener('click', (e) => {
     if (!e.target.closest('.horario-remove')) return;
@@ -213,6 +232,7 @@
     overrideDoDia(selecionado).horarios.splice(row.dataset.i, 1);
     desenharHorarios(configDoDia(selecionado));
     atualizarTotal();
+    desenharCalendario();
   });
 
   $('.btn-dashed').addEventListener('click', () => {
@@ -220,10 +240,12 @@
     if (!ov.open) return;
     const ultimo = ov.horarios[ov.horarios.length - 1];
     const inicio = ultimo ? ultimo.end : '08:00';
-    const [h, m] = inicio.split(':').map(Number);
-    ov.horarios.push({ start: inicio, end: `${pad(Math.min(h + 1, 23))}:${pad(m)}`, vagas: 0, active: true });
+    const minuto = paraMinutos(inicio);
+    if (minuto >= 1439) return;
+    ov.horarios.push({ start: inicio, end: paraHora(Math.min(minuto + 60, 1439)), vagas: 0, active: true });
     desenharHorarios(configDoDia(selecionado));
     atualizarTotal();
+    desenharCalendario();
   });
 
   const [btnBloquear, btnLiberar, btnAplicar] = $$('.toolbar button');
@@ -261,6 +283,7 @@
       const status = row.querySelector('.status-check');
       const [ini, fim, cap] = row.querySelectorAll('input');
       row.classList.toggle('is-disabled', !p.open);
+      status.setAttribute('aria-pressed', String(p.open));
       status.className = p.open ? 'status-check is-open' : 'status-check is-closed';
       status.innerHTML = p.open
         ? '<span class="check-box is-checked"><i class="ph-bold ph-check"></i></span> Aberto'
@@ -301,7 +324,37 @@
     });
   });
 
-  $('.page-actions .btn-primary').addEventListener('click', () => alert('Alterações salvas com sucesso!'));
+  $('.page-actions .btn-primary').addEventListener('click', async (e) => {
+    const botao = e.currentTarget;
+    botao.disabled = true;
+    try {
+      const resposta = await fetch(painel.dataset.saveUrl, {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({
+          revision: versao,
+          pattern: state.pattern,
+          blocked: state.blocked,
+          overrides: Object.entries(state.overrides).map(([date, day]) => ({ date, ...day })),
+        }),
+      });
+      const resultado = await resposta.json();
+      if (!resposta.ok) {
+        alert(Object.values(resultado.errors ?? {}).flat()[0] ?? resultado.message ?? 'Não foi possível salvar a agenda.');
+        return;
+      }
+      versao = resultado.revision;
+      alert('Alterações salvas com sucesso!');
+    } catch {
+      alert('Não foi possível confirmar o salvamento da agenda.');
+    } finally {
+      botao.disabled = false;
+    }
+  });
 
   desenharCalendario();
   desenharPainel();

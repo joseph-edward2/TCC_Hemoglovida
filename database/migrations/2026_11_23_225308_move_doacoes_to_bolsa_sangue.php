@@ -14,14 +14,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('bolsa_sangue', function (Blueprint $table): void {
-            $table->foreignId('protocolo_agendamento')->nullable()->unique()
-                ->constrained('agendamento', 'protocolo_agendamento');
-            $table->dateTime('data_hora_coleta')->nullable();
-            $table->string('status_bolsa_doacao', 30)->nullable();
-            $table->decimal('volume_ml_doacao', 6, 2)->nullable();
-            $table->date('data_venc_bolsa')->nullable()->change();
-        });
+        if (! Schema::hasTable('bolsa_sangue')) {
+            Schema::create('bolsa_sangue', function (Blueprint $table): void {
+                $table->char('isbt', 20)->primary();
+                $table->char('cnes_hem', 7);
+                $table->integer('quant_bolsa')->default(0);
+                $table->string('tipo_bolsa', 50);
+                $table->string('disponibilidade_bolsa', 30);
+                $table->date('data_venc_bolsa')->nullable();
+                $table->foreign('cnes_hem', 'fk_bolsa_hemocentro')
+                    ->references('cnes_hem')->on('hemocentro');
+                $this->addDonationColumns($table);
+            });
+        } elseif (! Schema::hasColumn('bolsa_sangue', 'protocolo_agendamento')) {
+            Schema::table('bolsa_sangue', function (Blueprint $table): void {
+                $this->addDonationColumns($table);
+                $table->date('data_venc_bolsa')->nullable()->change();
+            });
+        }
 
         if (! Schema::hasTable('doacao')) {
             return;
@@ -31,6 +41,8 @@ return new class extends Migration
             DB::table('doacao')
                 ->leftJoin('agendamento', 'agendamento.protocolo_agendamento', '=', 'doacao.protocolo_agendamento')
                 ->leftJoin('doador', 'doador.cpf_doador', '=', 'agendamento.cpf_doador')
+                ->whereNotIn('doacao.protocolo_agendamento', DB::table('bolsa_sangue')
+                    ->whereNotNull('protocolo_agendamento')->select('protocolo_agendamento'))
                 ->select('doacao.*', 'agendamento.cnes_hem', 'doador.tipo_sanguineo')
                 ->chunkById(100, function (Collection $doacoes): void {
                     DB::table('bolsa_sangue')->insert($doacoes->map(fn (stdClass $doacao): array => [
@@ -48,27 +60,45 @@ return new class extends Migration
         });
     }
 
+    private function addDonationColumns(Blueprint $table): void
+    {
+        $table->foreignId('protocolo_agendamento')->nullable()->unique()
+            ->constrained('agendamento', 'protocolo_agendamento');
+        $table->dateTime('data_hora_coleta')->nullable();
+        $table->string('status_bolsa_doacao', 30)->nullable();
+        $table->decimal('volume_ml_doacao', 6, 2)->nullable();
+    }
+
     /**
      * Restore the collection data to doacao. The old schema has no fields for
      * stock metadata assigned to bags linked to these collections.
      */
     public function down(): void
     {
-        Schema::create('doacao', function (Blueprint $table): void {
-            $table->unsignedBigInteger('protocolo_agendamento')->primary();
-            $table->dateTime('data_hora_coleta');
-            $table->string('status_bolsa_doacao', 30);
-            $table->decimal('volume_ml_doacao', 6, 2);
+        if (! in_array('2026_11_21_214421_create_bolsa_sangue_table', app('migration.repository')->getRan(), true)) {
+            Schema::dropIfExists('bolsa_sangue');
 
-            $table->foreign('protocolo_agendamento', 'fk_doacao_agendamento')
-                ->references('protocolo_agendamento')->on('agendamento');
-        });
+            return;
+        }
+
+        if (! Schema::hasTable('doacao')) {
+            Schema::create('doacao', function (Blueprint $table): void {
+                $table->unsignedBigInteger('protocolo_agendamento')->primary();
+                $table->dateTime('data_hora_coleta');
+                $table->string('status_bolsa_doacao', 30);
+                $table->decimal('volume_ml_doacao', 6, 2);
+
+                $table->foreign('protocolo_agendamento', 'fk_doacao_agendamento')
+                    ->references('protocolo_agendamento')->on('agendamento');
+            });
+        }
 
         DB::transaction(function (): void {
             $columns = ['protocolo_agendamento', 'data_hora_coleta', 'status_bolsa_doacao', 'volume_ml_doacao'];
             $linkedBags = DB::table('bolsa_sangue')->whereNotNull('protocolo_agendamento');
 
-            DB::table('doacao')->insertUsing($columns, $linkedBags->select($columns));
+            $missingDonations = (clone $linkedBags)->whereNotIn('protocolo_agendamento', DB::table('doacao')->select('protocolo_agendamento'));
+            DB::table('doacao')->insertUsing($columns, $missingDonations->select($columns));
             $linkedBags->delete();
         });
 

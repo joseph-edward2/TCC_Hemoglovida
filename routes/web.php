@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HemocentroAgendamentoController;
 use App\Http\Controllers\HemocentroAtendimentoController;
 use App\Http\Controllers\HemocentroDashboardController;
 use App\Http\Controllers\HemocentroEstoqueController;
@@ -31,7 +32,8 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
 
     Route::middleware('auth:hemocentro,funcionario')->group(function (): void {
         Route::post('/sair', [HemocentroSessionController::class, 'destroy'])->name('logout');
-        Route::view('/Hem_Agendamento.blade.php', 'hemocentro.Hem_Agendamento')->name('agendamento');
+        Route::get('/Hem_Agendamento.blade.php', [HemocentroAgendamentoController::class, 'index'])->name('agendamento');
+        Route::put('/agendamento', [HemocentroAgendamentoController::class, 'update'])->name('agendamento.update');
         Route::view('/Hem_Alertas.blade.php', 'hemocentro.Hem_Alertas')->name('alertas');
         Route::get('/Hem_Atendimento.blade.php', [HemocentroAtendimentoController::class, 'index'])->name('atendimento');
         Route::post('/atendimento/{protocolo}/confirmar-chegada', [HemocentroAtendimentoController::class, 'confirmarChegada'])

@@ -5,6 +5,7 @@
   <title>Hemoglovida | Configurar Agenda de Doações</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hemocentro/agendamento.css') }}">
@@ -29,7 +30,7 @@
   </div>
 
     <div class="user">
-     <span>Bem-vindo, Dr. Walter White</span>
+     <span>Bem-vindo{{ isset(auth()->user()->nome_fun) ? ', '.auth()->user()->nome_fun : '' }}</span>
       <a href="Hem_Usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
@@ -38,7 +39,7 @@
     </div>
 </header>
 
-<main class="dashboard">
+<main class="dashboard" data-calendar-url="{{ route('hemocentro.agendamento') }}" data-save-url="{{ route('hemocentro.agendamento.update') }}">
 
   <div class="page-header">
     <div>
@@ -60,10 +61,10 @@
       </div>
 
       <div class="calendar-header">
-        <h2>Março 2026</h2>
+        <h2></h2>
         <div class="calendar-nav">
-          <button><i class="ph ph-caret-left"></i></button>
-          <button><i class="ph ph-caret-right"></i></button>
+          <button aria-label="Mês anterior"><i class="ph ph-caret-left"></i></button>
+          <button aria-label="Próximo mês"><i class="ph ph-caret-right"></i></button>
         </div>
       </div>
 
@@ -71,55 +72,7 @@
         <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sab</span>
       </div>
 
-      <div class="calendar-grid">
-        <div class="calendar-day is-outside">25</div>
-        <div class="calendar-day is-outside">26</div>
-        <div class="calendar-day is-outside">27</div>
-        <div class="calendar-day is-outside">28</div>
-        <div class="calendar-day is-outside">29</div>
-        <div class="calendar-day is-selected">01<span class="dot"></span></div>
-        <div class="calendar-day">02<span class="dot"></span></div>
-
-        <div class="calendar-day is-outside">03</div>
-        <div class="calendar-day">04<span class="dot"></span></div>
-        <div class="calendar-day">05<span class="dot"></span></div>
-        <div class="calendar-day">06<span class="dot"></span></div>
-        <div class="calendar-day">07<span class="dot"></span></div>
-        <div class="calendar-day">08<span class="dot"></span></div>
-        <div class="calendar-day">09<span class="dot"></span></div>
-
-        <div class="calendar-day is-outside">10</div>
-        <div class="calendar-day">11<span class="dot"></span></div>
-        <div class="calendar-day">12<span class="dot"></span></div>
-        <div class="calendar-day">13<span class="dot"></span></div>
-        <div class="calendar-day">14<span class="dot"></span></div>
-        <div class="calendar-day">15<span class="dot"></span></div>
-        <div class="calendar-day">16<span class="dot"></span></div>
-
-        <div class="calendar-day is-outside">17</div>
-        <div class="calendar-day">18<span class="dot"></span></div>
-        <div class="calendar-day">19<span class="dot"></span></div>
-        <div class="calendar-day">20<span class="dot"></span></div>
-        <div class="calendar-day">21<span class="dot"></span></div>
-        <div class="calendar-day">22<span class="dot"></span></div>
-        <div class="calendar-day">23<span class="dot"></span></div>
-
-        <div class="calendar-day is-outside">24</div>
-        <div class="calendar-day">25<span class="dot"></span></div>
-        <div class="calendar-day">26<span class="dot"></span></div>
-        <div class="calendar-day">27<span class="dot"></span></div>
-        <div class="calendar-day">28<span class="dot"></span></div>
-        <div class="calendar-day">29<span class="dot"></span></div>
-        <div class="calendar-day">30<span class="dot"></span></div>
-
-        <div class="calendar-day is-outside">31</div>
-        <div class="calendar-day">01<span class="dot"></span></div>
-        <div class="calendar-day">02<span class="dot"></span></div>
-        <div class="calendar-day">03<span class="dot"></span></div>
-        <div class="calendar-day">04<span class="dot"></span></div>
-        <div class="calendar-day">05<span class="dot"></span></div>
-        <div class="calendar-day">06<span class="dot"></span></div>
-      </div>
+      <div class="calendar-grid"></div>
 
       <div class="calendar-legend">
         <span class="legend-item"><span class="legend-swatch"></span> Disponível</span>
@@ -130,8 +83,8 @@
 
     <div class="panel day-config">
       <div class="day-config-head">
-        <h2>Configurar 06 de Março</h2>
-        <p>Quarta-feira</p>
+        <h2></h2>
+        <p></p>
       </div>
 
       <div class="day-config-body">
@@ -145,35 +98,10 @@
 
         <div class="day-config-subhead">
           <span class="label">Horários e<br>Vagas</span>
-          <span class="total">Total: 30<br>vagas</span>
+          <span class="total"></span>
         </div>
 
-        <div class="horario-list">
-          <div class="horario-row">
-            <div class="horario-time">08:00 - 09:00<small>Intervalo de 1 hora</small></div>
-            <input class="horario-vagas" type="text" value="5">
-            <label class="switch">
-              <input type="checkbox" checked>
-              <span class="track"></span>
-            </label>
-          </div>
-          <div class="horario-row">
-            <div class="horario-time">09:00 - 10:00<small>Intervalo de 1 hora</small></div>
-            <input class="horario-vagas" type="text" value="10">
-            <label class="switch">
-              <input type="checkbox" checked>
-              <span class="track"></span>
-            </label>
-          </div>
-          <div class="horario-row">
-            <div class="horario-time">10:00 - 11:00<small>Intervalo de 1 hora</small></div>
-            <input class="horario-vagas" type="text" value="8">
-            <label class="switch">
-              <input type="checkbox" checked>
-              <span class="track"></span>
-            </label>
-          </div>
-        </div>
+        <div class="horario-list"></div>
 
         <button class="btn-dashed"><i class="ph ph-plus"></i> Adicionar novo horário</button>
       </div>
@@ -185,9 +113,6 @@
       <div>
         <h2>Configuração Padrão Semanal</h2>
         <p class="page-desc" style="margin-top:4px;">Aplica-se automaticamente a todos os dias, a menos que haja bloqueio manual</p>
-      </div>
-      <div class="panel-actions">
-        <button class="icon-btn"><i class="ph ph-calendar-blank"></i></button>
       </div>
     </div>
 
@@ -202,61 +127,22 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="day-name">Segunda-feira</td>
-          <td><span class="status-check is-open"><span class="check-box is-checked"><i class="ph-bold ph-check"></i></span> Aberto</span></td>
-          <td><input class="time-input" type="text" value="08:00 AM"></td>
-          <td><input class="time-input" type="text" value="06:00 PM"></td>
-          <td><input class="capacity-input" type="text" value="120"></td>
-        </tr>
-        <tr>
-          <td class="day-name">Terça-feira</td>
-          <td><span class="status-check is-open"><span class="check-box is-checked"><i class="ph-bold ph-check"></i></span> Aberto</span></td>
-          <td><input class="time-input" type="text" value="08:00 AM"></td>
-          <td><input class="time-input" type="text" value="06:00 PM"></td>
-          <td><input class="capacity-input" type="text" value="120"></td>
-        </tr>
-        <tr>
-          <td class="day-name">Quarta-feira</td>
-          <td><span class="status-check is-open"><span class="check-box is-checked"><i class="ph-bold ph-check"></i></span> Aberto</span></td>
-          <td><input class="time-input" type="text" value="08:00 AM"></td>
-          <td><input class="time-input" type="text" value="06:00 PM"></td>
-          <td><input class="capacity-input" type="text" value="120"></td>
-        </tr>
-        <tr>
-          <td class="day-name">Quinta-feira</td>
-          <td><span class="status-check is-open"><span class="check-box is-checked"><i class="ph-bold ph-check"></i></span> Aberto</span></td>
-          <td><input class="time-input" type="text" value="08:00 AM"></td>
-          <td><input class="time-input" type="text" value="06:00 PM"></td>
-          <td><input class="capacity-input" type="text" value="120"></td>
-        </tr>
-        <tr>
-          <td class="day-name">Sexta-feira</td>
-          <td><span class="status-check is-open"><span class="check-box is-checked"><i class="ph-bold ph-check"></i></span> Aberto</span></td>
-          <td><input class="time-input" type="text" value="08:00 AM"></td>
-          <td><input class="time-input" type="text" value="06:00 PM"></td>
-          <td><input class="capacity-input" type="text" value="120"></td>
-        </tr>
-        <tr class="is-saturday">
-          <td class="day-name">Sábado</td>
-          <td><span class="status-check is-open"><span class="check-box is-checked"><i class="ph-bold ph-check"></i></span> Aberto</span></td>
-          <td><input class="time-input" type="text" value="08:00 AM"></td>
-          <td><input class="time-input" type="text" value="12:00 PM"></td>
-          <td><input class="capacity-input" type="text" value="60"></td>
-        </tr>
-        <tr class="is-disabled">
-          <td class="day-name">Domingo</td>
-          <td><span class="status-check is-closed"><span class="check-box"></span> Fechado</span></td>
-          <td><input class="time-input" type="text" value="12:00 AM" disabled></td>
-          <td><input class="time-input" type="text" value="12:00 AM" disabled></td>
-          <td><input class="capacity-input" type="text" value="0" disabled></td>
-        </tr>
+        @foreach (['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'] as $day)
+          <tr @class(['is-saturday' => $day === 'Sábado'])>
+            <td class="day-name">{{ $day }}</td>
+            <td><button type="button" class="status-check"></button></td>
+            <td><input class="time-input" type="time" aria-label="Início, {{ $day }}"></td>
+            <td><input class="time-input" type="time" aria-label="Fim, {{ $day }}"></td>
+            <td><input class="capacity-input" type="text" inputmode="numeric" aria-label="Capacidade, {{ $day }}"></td>
+          </tr>
+        @endforeach
       </tbody>
     </table>
   </section>
 
 </main>
 
+  <script>const agenda = {{ Js::from($agenda) }};</script>
   <script src="{{ asset('js/hemocentro/agendamento.js') }}"></script>
 </body>
 </html>
