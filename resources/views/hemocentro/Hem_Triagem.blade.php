@@ -48,107 +48,59 @@
     <button class="btn-filter"><i class="ph ph-funnel"></i> Filtrar</button>
   </div>
 
+  @if (session('status'))
+    <p role="status">{{ session('status') }}</p>
+  @endif
+  @if ($errors->any())
+    <p role="alert">{{ $errors->first() }}</p>
+  @endif
+
   <div class="triage-list">
-
-    <div class="triage-row">
-      <div class="triage-id">
-        <div class="triage-avatar"><i class="ph-fill ph-drop"></i></div>
-        <div>
-          <div class="triage-type">O+</div>
-          <div class="triage-code">#BV-98231-X</div>
+    @forelse ($bags as $bag)
+      <div class="triage-row">
+        <div class="triage-id">
+          <div class="triage-avatar"><i class="ph-fill ph-drop"></i></div>
+          <div>
+            <div class="triage-type">{{ strtoupper(trim($bag->tipo_bolsa)) }}</div>
+            <div class="triage-code">{{ $bag->isbt }}</div>
+          </div>
         </div>
-      </div>
-      <div class="triage-status">
-        <span class="badge-pill badge-waiting">Aguardando exame</span>
-      </div>
-      <div class="triage-doc">
-        <button class="doc-btn"><i class="ph ph-file-arrow-up"></i> Anexar Laudo</button>
-      </div>
-      <div class="triage-action">
-        <button class="release-btn is-disabled" disabled><i class="ph ph-check-circle"></i> Liberar para Estoque</button>
-      </div>
-    </div>
-
-    <div class="triage-row">
-      <div class="triage-id">
-        <div class="triage-avatar"><i class="ph-fill ph-drop"></i></div>
-        <div>
-          <div class="triage-type">AB-</div>
-          <div class="triage-code">#BV-98245-Y</div>
+        <div class="triage-status">
+          @if ($bag->laudo_path)
+            <span class="badge-pill badge-attached"><i class="ph ph-check"></i> Exame anexado</span>
+          @else
+            <span class="badge-pill badge-waiting">Aguardando exame</span>
+          @endif
         </div>
-      </div>
-      <div class="triage-status">
-        <span class="badge-pill badge-attached"><i class="ph ph-check"></i> Exame anexado</span>
-      </div>
-      <div class="triage-doc">
-        <button class="doc-btn"><i class="ph ph-eye"></i> Ver Documento</button>
-      </div>
-      <div class="triage-action">
-        <button class="release-btn is-enabled"><i class="ph ph-check-circle"></i> Liberar para Estoque</button>
-      </div>
-    </div>
-
-    <div class="triage-row">
-      <div class="triage-id">
-        <div class="triage-avatar"><i class="ph-fill ph-drop"></i></div>
-        <div>
-          <div class="triage-type">A+</div>
-          <div class="triage-code">#BV-98250-A</div>
+        <div class="triage-doc">
+          @if ($bag->laudo_path)
+            <a class="doc-btn" href="{{ route('hemocentro.triagem.laudo', $bag->isbt) }}" target="_blank" rel="noopener"><i class="ph ph-eye"></i> Ver Documento</a>
+          @else
+            <form method="post" action="{{ route('hemocentro.triagem.anexar', $bag->isbt) }}" enctype="multipart/form-data">
+              @csrf
+              <label class="doc-btn" title="PDF, PNG ou JPG de até 10 MB">
+                <i class="ph ph-file-arrow-up"></i> Anexar Laudo
+                <input type="file" name="laudo" accept=".pdf,.png,.jpg,.jpeg" required>
+              </label>
+              <noscript><button type="submit">Enviar laudo</button></noscript>
+            </form>
+          @endif
         </div>
+        <form class="triage-action" method="post" action="{{ route('hemocentro.triagem.concluir', $bag->isbt) }}">
+          @csrf
+          <button type="submit" name="status" value="disponivel" class="release-btn {{ $bag->laudo_path ? 'is-enabled' : 'is-disabled' }}" @disabled(!$bag->laudo_path)><i class="ph ph-check-circle"></i> Liberar para Estoque</button>
+          <button type="submit" name="status" value="recusada" class="release-btn {{ $bag->laudo_path ? 'is-enabled' : 'is-disabled' }}" @disabled(!$bag->laudo_path)><i class="ph ph-x-circle"></i> Recusar Bolsa</button>
+        </form>
       </div>
-      <div class="triage-status">
-        <span class="badge-pill badge-waiting">Aguardando exame</span>
-      </div>
-      <div class="triage-doc">
-        <button class="doc-btn"><i class="ph ph-file-arrow-up"></i> Anexar Laudo</button>
-      </div>
-      <div class="triage-action">
-        <button class="release-btn is-disabled" disabled><i class="ph ph-check-circle"></i> Liberar para Estoque</button>
-      </div>
-    </div>
-
-    <div class="triage-row">
-      <div class="triage-id">
-        <div class="triage-avatar"><i class="ph-fill ph-drop"></i></div>
-        <div>
-          <div class="triage-type">B+</div>
-          <div class="triage-code">#BV-98261-B</div>
-        </div>
-      </div>
-      <div class="triage-status">
-        <span class="badge-pill badge-attached"><i class="ph ph-check"></i> Exame anexado</span>
-      </div>
-      <div class="triage-doc">
-        <button class="doc-btn"><i class="ph ph-eye"></i> Ver Documento</button>
-      </div>
-      <div class="triage-action">
-        <button class="release-btn is-enabled"><i class="ph ph-check-circle"></i> Liberar para Estoque</button>
-      </div>
-    </div>
-
-    <div class="triage-row">
-      <div class="triage-id">
-        <div class="triage-avatar"><i class="ph-fill ph-drop"></i></div>
-        <div>
-          <div class="triage-type">O-</div>
-          <div class="triage-code">#BV-98272-O</div>
-        </div>
-      </div>
-      <div class="triage-status">
-        <span class="badge-pill badge-waiting">Aguardando exame</span>
-      </div>
-      <div class="triage-doc">
-        <button class="doc-btn"><i class="ph ph-file-arrow-up"></i> Anexar Laudo</button>
-      </div>
-      <div class="triage-action">
-        <button class="release-btn is-disabled" disabled><i class="ph ph-check-circle"></i> Liberar para Estoque</button>
-      </div>
-    </div>
-
+    @empty
+      <p class="triage-empty">Nenhuma bolsa em análise.</p>
+    @endforelse
+    @if ($bags->isNotEmpty())
+      <p class="triage-empty" id="filter-empty" hidden>Nenhuma bolsa encontrada para este filtro.</p>
+    @endif
   </div>
-
 </main>
 
-<script src="{{ asset('css/hemocentro/triagem.css') }}"></script>
+<script src="{{ asset('js/hemocentro/triagem.js') }}"></script>
 </body>
 </html>

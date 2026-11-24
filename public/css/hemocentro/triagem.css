@@ -123,6 +123,9 @@
 .triage-doc{ width:180px; flex-shrink:0; }
 
 .doc-btn{
+  position:relative;
+  overflow:hidden;
+  text-decoration:none;
   display:inline-flex;
   align-items:center;
   gap:8px;
@@ -139,7 +142,9 @@
 .doc-btn:hover{ background:var(--bg); }
 .doc-btn i{ font-size:15px; }
 
-.triage-action{ margin-left:auto; }
+.doc-btn input[type=file]{ position:absolute; inset:0; width:100%; opacity:0; cursor:pointer; }
+.doc-btn:focus-within{ outline:2px solid var(--brand); }
+.triage-action{ display:flex; flex-wrap:wrap; gap:8px; margin-left:auto; }
 
 .release-btn{
   display:inline-flex;
