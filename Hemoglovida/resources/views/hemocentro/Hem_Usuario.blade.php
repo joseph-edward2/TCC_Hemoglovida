@@ -4,37 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hemoglovida — Minha Conta</title>
-<link rel="stylesheet" href="{{ asset('css/hemocentro/conta.css') }}">
 <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hemocentro/conta.css') }}">
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 </head>
 <body>
 
 <header>
-  <!--Título e logo-->
   <div class="header-left">
     <div class="logo">
       <img src="{{ asset('assets/logo.png') }}" alt="Logo Hemoglovida" class="logo-icon">
       Hemoglovida
     </div>
 
-    <!--Links da navbar-->
     <nav>
-      <a href="Hem_Tela_Inicial.html">Visão Geral</a>
-      <a href="Hem_Atendimento.html">Atendimento</a>
-      <a href="Hem_Estoque.html">Estoque</a>
-      <a href="Hem_Agendamento.html">Agendamentos</a>
-      <a href="Hem_Pedidos.html">Pedidos</a>
-      <a href="Hem_Alertas.html">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
     </nav>
   </div>
 
-  <!--Ícone de usuário-->
     <div class="user">
-     <span>Bem-vindo, Dr. Walter White</span>
-      <a href="Hem_Usuario.html">
+     <span>Bem-vindo, {{ $nomeExibido() }}</span>
+      <a href="Hem_Usuario.blade.php">
       <div class="avatar">
-        <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
+        <img src="{{ $fotoPerfil() }}" alt="Foto do usuário">
       </div>
       </a>
     </div>
@@ -43,23 +40,22 @@
 <main>
   <div class="profile-head">
     <div class="profile-photo">
-      <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto de perfil" id="profileImg">
+      <img src="{{ $fotoPerfil() }}" alt="Foto de perfil" id="profileImg">
       <button class="photo-edit" id="photoEditBtn"><i class="ph ph-camera"></i></button>
     </div>
     <div>
       <h1>Minha Conta</h1>
-      <p class="profile-name">Walter White</p>
+      <p class="profile-name">{{ $nomeExibido() }}</p>
       <a href="#" class="edit-photo-link" id="editPhotoLink">Editar Foto</a>
     </div>
   </div>
 
-  <!-- DADOS PESSOAIS -->
   <section class="panel">
     <h2>Dados Pessoais</h2>
     <div class="grid-2">
       <div class="field">
         <label>Nome Completo</label>
-        <input type="text" id="fullName" value="Walter White" disabled>
+        <input type="text" id="fullName" value="{{ $nomeExibido() }}" disabled>
       </div>
       <div class="field">
         <label>Código de Registro</label>
@@ -89,7 +85,6 @@
     </div>
   </section>
 
-  <!-- SENHA -->
   <section class="panel">
     <h2>Senha</h2>
     <div class="field">
@@ -104,11 +99,16 @@
 
   <div class="bottom-actions">
     <button class="btn-solid" id="saveBtn">Salvar Alterações</button>
-    <button class="btn-outline-danger" id="deleteAccountBtn"><i class="ph ph-prohibit"></i> Encerrar Conta</button>
+    @if ($podeCadastrarFuncionario('hemocentro'))
+      <a class="btn-solid" href="{{ route('hemocentro.cadastro-funcionario') }}">Cadastro Funcionário</a>
+    @endif
+    <form method="POST" action="{{ route('hemocentro.logout') }}">
+      @csrf
+      <button type="submit" class="btn-logout"><i class="ph ph-sign-out" aria-hidden="true"></i> Sair</button>
+    </form>
   </div>
 </main>
 
-<!-- MODAL ALTERAR SENHA -->
 <div class="overlay" id="passwordOverlay">
   <div class="modal">
     <button class="close" id="passwordClose"><i class="ph ph-x"></i></button>
@@ -126,20 +126,6 @@
       <input type="password" id="confirmPass" placeholder="Repita a nova senha">
     </div>
     <button class="btn-solid full" id="savePasswordBtn">Salvar Nova Senha</button>
-  </div>
-</div>
-
-<!-- MODAL ENCERRAR CONTA -->
-<div class="overlay" id="deleteOverlay">
-  <div class="modal">
-    <button class="close" id="deleteClose"><i class="ph ph-x"></i></button>
-    <div class="modal-icon"><i class="ph ph-warning"></i></div>
-    <h2>Encerrar Conta</h2>
-    <p class="modal-text">Essa ação é permanente e removerá seu acesso ao painel do hemocentro. Tem certeza que deseja continuar?</p>
-    <div class="modal-actions">
-      <button class="btn-outline" id="cancelDelete">Cancelar</button>
-      <button class="btn-danger" id="confirmDelete">Sim, encerrar conta</button>
-    </div>
   </div>
 </div>
 

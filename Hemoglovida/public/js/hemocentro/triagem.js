@@ -3,7 +3,7 @@
 
   const state = {
     searchTerm: "",
-    statusFilter: "all", // "all" | "waiting" | "attached"
+    statusFilter: "all", // "all" | "waiting" | "attached" | "rejected"
   };
 
   // Guarda os arquivos (laudos) anexados pelo usuário nesta sessão,
@@ -56,6 +56,7 @@
       <button type="button" class="filter-option is-active" data-value="all">Todos</button>
       <button type="button" class="filter-option" data-value="waiting">Aguardando exame</button>
       <button type="button" class="filter-option" data-value="attached">Exame anexado</button>
+      <button type="button" class="filter-option" data-value="rejected">Reprovada</button>
     `;
     wrapper.appendChild(dropdown);
 
@@ -94,11 +95,14 @@
       const matchesSearch =
         !state.searchTerm || type.includes(state.searchTerm) || code.includes(state.searchTerm);
 
-      const isAttached = row.querySelector(".badge-pill")?.classList.contains("badge-attached");
+      const badge = row.querySelector(".badge-pill");
+      const isAttached = badge?.classList.contains("badge-attached");
+      const isRejected = badge?.classList.contains("badge-rejected");
       const matchesStatus =
         state.statusFilter === "all" ||
         (state.statusFilter === "attached" && isAttached) ||
-        (state.statusFilter === "waiting" && !isAttached);
+        (state.statusFilter === "waiting" && !isAttached && !isRejected && !badge?.classList.contains("badge-approved")) ||
+        (state.statusFilter === "rejected" && isRejected);
 
       const visible = matchesSearch && matchesStatus;
       row.style.display = visible ? "" : "none";
@@ -123,6 +127,12 @@
       const releaseBtn = e.target.closest(".release-btn");
       if (releaseBtn && !releaseBtn.disabled) {
         handleReleaseClick(releaseBtn);
+        return;
+      }
+
+      const rejectBtn = e.target.closest(".reject-btn");
+      if (rejectBtn && !rejectBtn.disabled) {
+        handleRejectClick(rejectBtn);
       }
     });
   }
@@ -192,6 +202,11 @@
     releaseBtn.disabled = false;
     releaseBtn.classList.remove("is-disabled");
     releaseBtn.classList.add("is-enabled");
+
+    const rejectBtn = row.querySelector(".reject-btn");
+    rejectBtn.disabled = false;
+    rejectBtn.classList.remove("is-disabled");
+    rejectBtn.classList.add("is-enabled");
   }
 
 
@@ -255,16 +270,37 @@
     );
     if (!confirmed) return;
 
-    row.classList.add("is-releasing");
-    row.addEventListener(
-      "transitionend",
-      () => {
-        row.remove();
-        showToast(`Bolsa ${code} liberada para o estoque com sucesso!`, "success");
-        applyFilters();
-      },
-      { once: true }
-    );
+    const badge = row.querySelector(".badge-pill");
+    badge.className = "badge-pill badge-approved";
+    badge.innerHTML = '<i class="ph ph-check-circle"></i> Aprovada para estoque';
+    row.querySelector(".doc-btn").disabled = true;
+    btn.disabled = true;
+    btn.className = "release-btn is-disabled";
+    const rejectBtn = row.querySelector(".reject-btn");
+    rejectBtn.disabled = true;
+    rejectBtn.className = "reject-btn is-disabled";
+    showToast(`Bolsa ${code} aprovada e liberada para o estoque.`, "success");
+    applyFilters();
+  }
+
+  function handleRejectClick(btn) {
+    const row = btn.closest(".triage-row");
+    const code = getCode(row);
+    const reason = window.prompt(`Informe o motivo da reprovação da bolsa ${code}:`);
+    if (reason === null) return;
+
+    const badge = row.querySelector(".badge-pill");
+    badge.className = "badge-pill badge-rejected";
+    badge.innerHTML = '<i class="ph ph-x-circle"></i> Bolsa reprovada';
+
+    row.classList.add("is-rejected");
+    row.querySelector(".doc-btn").disabled = true;
+    row.querySelector(".release-btn").disabled = true;
+    row.querySelector(".release-btn").className = "release-btn is-disabled";
+    btn.disabled = true;
+    btn.className = "reject-btn is-disabled";
+    showToast(`Bolsa ${code} reprovada${reason.trim() ? `: ${reason.trim()}` : ''}.`, "error");
+    applyFilters();
   }
 
   function toggleEmptyState(show) {

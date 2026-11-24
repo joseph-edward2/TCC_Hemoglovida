@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\HemocentroFuncionarioController;
+use App\Http\Controllers\HemocentroSessionController;
+use App\Http\Controllers\HospitalFuncionarioController;
+use App\Http\Controllers\HospitalSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'usuario.index')->name('home');
@@ -17,18 +21,55 @@ Route::view('/usuario/nova-senha.html', 'usuario.nova-senha')->name('usuario.nov
 Route::view('/usuario/pedidos.html', 'usuario.pedidos')->name('usuario.pedidos');
 Route::view('/usuario/recuperar-senha.html', 'usuario.recuperar-senha')->name('usuario.recuperar-senha');
 
-Route::view('/hemocentro/Hem_Agendamento.html', 'hemocentro.Hem_Agendamento')->name('hemocentro.agendamento');
-Route::view('/hemocentro/Hem_Alertas.html', 'hemocentro.Hem_Alertas')->name('hemocentro.alertas');
-Route::view('/hemocentro/Hem_Atendimento.html', 'hemocentro.Hem_Atendimento')->name('hemocentro.atendimento');
-Route::view('/hemocentro/Hem_Estoque.html', 'hemocentro.Hem_Estoque')->name('hemocentro.estoque');
-Route::view('/hemocentro/Hem_Login.html', 'hemocentro.Hem_Login')->name('hemocentro.login');
-Route::view('/hemocentro/Hem_Pedidos.html', 'hemocentro.Hem_Pedidos')->name('hemocentro.pedidos');
-Route::view('/hemocentro/Hem_Tela_Inicial.html', 'hemocentro.Hem_Tela_Inicial')->name('hemocentro.inicio');
-Route::view('/hemocentro/Hem_Triagem.html', 'hemocentro.Hem_Triagem')->name('hemocentro.triagem');
-Route::view('/hemocentro/Hem_Usuario.html', 'hemocentro.Hem_Usuario')->name('hemocentro.usuario');
+Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
+    Route::middleware('guest:hemocentro,funcionario')->group(function (): void {
+        Route::view('/Hem_Login.blade.php', 'hemocentro.Hem_Login')->name('login');
+        Route::post('/Hem_Login.blade.php', [HemocentroSessionController::class, 'store'])
+            ->middleware('throttle:10,1,hemocentro-login')
+            ->name('login.store');
+    });
 
-Route::view('/hospital/Hemocentro_cadastro_funcionario.html', 'hospital.Hemocentro_cadastro_funcionario')->name('hospital.cadastro-funcionario');
-Route::view('/hospital/Hospital_estoque.html', 'hospital.Hospital_estoque')->name('hospital.estoque');
-Route::view('/hospital/Hospital_Login.html', 'hospital.Hospital_Login')->name('hospital.login');
-Route::view('/hospital/Hospital_pedidos.html', 'hospital.Hospital_pedidos')->name('hospital.pedidos');
-?>
+    Route::middleware('auth:hemocentro,funcionario')->group(function (): void {
+        Route::post('/sair', [HemocentroSessionController::class, 'destroy'])->name('logout');
+
+        Route::view('/Hem_Agendamento.blade.php', 'hemocentro.Hem_Agendamento')->name('agendamento');
+        Route::view('/Hem_Alertas.blade.php', 'hemocentro.Hem_Alertas')->name('alertas');
+        Route::view('/Hem_Atendimento.blade.php', 'hemocentro.Hem_Atendimento')->name('atendimento');
+        Route::view('/Hem_Estoque.blade.php', 'hemocentro.Hem_Estoque')->name('estoque');
+        Route::view('/Hem_Pedidos.blade.php', 'hemocentro.Hem_Pedidos')->name('pedidos');
+        Route::view('/Hem_Tela_Inicial.blade.php', 'hemocentro.Hem_Tela_Inicial')->name('inicio');
+        Route::view('/Hem_Triagem.blade.php', 'hemocentro.Hem_Triagem')->name('triagem');
+        Route::view('/Hem_Usuario.blade.php', 'hemocentro.Hem_Usuario')->name('usuario');
+        Route::view('/Hem_cadastro_funcionario.blade.php', 'hemocentro.Hem_cadastro_funcionario')
+            ->middleware('cadastro-funcionario:hemocentro')
+            ->name('cadastro-funcionario');
+
+        Route::post('/Hem_cadastro_funcionario.blade.php', [HemocentroFuncionarioController::class, 'store'])
+            ->middleware(['throttle:20,1', 'cadastro-funcionario:hemocentro'])
+            ->name('funcionario.store');
+    });
+});
+
+Route::prefix('hospital')->name('hospital.')->group(function (): void {
+    Route::middleware('guest:hospital,funcionario')->group(function (): void {
+        Route::view('/Hospital_Login.blade.php', 'hospital.Hospital_Login')->name('login');
+        Route::post('/Hospital_Login.blade.php', [HospitalSessionController::class, 'store'])
+            ->middleware('throttle:10,1,hospital-login')
+            ->name('login.store');
+    });
+
+    Route::middleware('auth:hospital,funcionario')->group(function (): void {
+        Route::post('/sair', [HospitalSessionController::class, 'destroy'])->name('logout');
+
+        Route::view('/Hospital_estoque.blade.php', 'hospital.Hospital_estoque')->name('estoque');
+        Route::view('/Hospital_pedidos.blade.php', 'hospital.Hospital_pedidos')->name('pedidos');
+        Route::view('/Hospital_usuario.blade.php', 'hospital.Hospital_usuario')->name('usuario');
+        Route::view('/Hospital_cadastro_funcionario.blade.php', 'hospital.Hospital_cadastro_funcionario')
+            ->middleware('cadastro-funcionario:hospital')
+            ->name('cadastro-funcionario');
+
+        Route::post('/Hospital_cadastro_funcionario.blade.php', [HospitalFuncionarioController::class, 'store'])
+            ->middleware(['throttle:20,1', 'cadastro-funcionario:hospital'])
+            ->name('funcionario.store');
+    });
+});

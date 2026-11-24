@@ -7,8 +7,8 @@
 
   <!-- Lembrete: confira a profundidade das pastas antes de
        colar isso no seu projeto (quantos "../" precisa) -->
-  <link rel="stylesheet" href="{{ asset('/css/hospital/base.css') }}">
-  <link rel="stylesheet" href="{{ asset('/css/hospital/estoque.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/hospital/base.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/hospital/estoque.css') }}">
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 </head>
 <body>
@@ -26,17 +26,17 @@
 
       <!--Links da navbar-->
       <nav>
-        <a href="Hospital_estoque.html" class="active">Estoque</a>
-        <a href="Hospital_pedidos.html">Pedidos</a>
+        <a href="{{ route('hospital.estoque') }}" class="active">Estoque</a>
+        <a href="{{ route('hospital.pedidos') }}">Pedidos</a>
       </nav>
     </div>
 
     <!--Ícone de usuário-->
     <div class="user">
-      Bem-vindo, Renato Gonçalves
-      <a href="Hospital_usuario.html">
+      Bem-vindo, {{ $nomeExibido() }}
+      <a href="{{ route('hospital.usuario') }}">
       <div class="avatar">
-        <img src="{{ asset('assets/avatar.jpg') }}" alt="Foto de perfil">
+        <img src="{{ $fotoPerfil() }}" alt="Foto de perfil">
       </div>
       </a>
     </div>
@@ -273,32 +273,33 @@
       <!-- As alturas abaixo são fixas só pra representar o
            visual do gráfico. Em um projeto real, essas
            alturas viriam do banco de dados via JS/PHP. -->
-      <div class="bar-chart">
+      <div class="chart-scale" aria-hidden="true"><span>80</span><span>60</span><span>40</span><span>20</span><span>0</span></div>
+      <div class="bar-chart" aria-label="Consumo semanal: semana 1, 40 saídas e 54 entradas; semana 2, 63 saídas e 50 entradas; semana 3, 27 saídas e 77 entradas; semana 4, 59 saídas e 65 entradas.">
         <div class="bar-chart__week">
           <div class="bar-chart__bars">
-            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 80px;"></div>
-            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 108px;"></div>
+            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 80px;"><span>40</span></div>
+            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 108px;"><span>54</span></div>
           </div>
           <span class="bar-chart__label">SEMANA 1</span>
         </div>
         <div class="bar-chart__week">
           <div class="bar-chart__bars">
-            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 126px;"></div>
-            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 99px;"></div>
+            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 126px;"><span>63</span></div>
+            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 99px;"><span>50</span></div>
           </div>
           <span class="bar-chart__label">SEMANA 2</span>
         </div>
         <div class="bar-chart__week">
           <div class="bar-chart__bars">
-            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 54px;"></div>
-            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 153px;"></div>
+            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 54px;"><span>27</span></div>
+            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 153px;"><span>77</span></div>
           </div>
           <span class="bar-chart__label">SEMANA 3</span>
         </div>
         <div class="bar-chart__week">
           <div class="bar-chart__bars">
-            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 117px;"></div>
-            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 130px;"></div>
+            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 117px;"><span>59</span></div>
+            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 130px;"><span>65</span></div>
           </div>
           <span class="bar-chart__label">SEMANA 4</span>
         </div>

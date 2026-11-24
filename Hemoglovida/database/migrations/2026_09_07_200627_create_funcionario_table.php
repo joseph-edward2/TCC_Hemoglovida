@@ -11,25 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('funcionario', function (Blueprint $table) {
-            $table->string('nome_funcionario', 100);
-            $table->string('login_funcionario', 16)->primary();
-            $table->string('senha_funcionario', 100);
-            $table->string('codigo_registro_funcionario',16)->unique();
-            $table->enum('tipo_funcionario', ['responsavel_hemocentro', 'administrativo_hemocentro', 'responsavel_hospital', 'administrativo_hospital']);
-            $table->char('cnes_hemocentro', 7)->nullable();
-            $table->char('cnpj_hospital', 14)->nullable();
-            $table->timestamps();
+        Schema::create('funcionario', function (Blueprint $table): void {
+            $table->id('cod_reg_fun');
+            $table->char('cnes_hem', 7);
+            $table->string('nome_fun', 150);
+            $table->string('senha_fun', 255);
+            $table->string('tipo_fun', 80);
 
-            $table->foreign('cnes_hemocentro')
-                ->references('cnes_hemocentro')->on('hemocentro')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-            $table->foreign('cnpj_hospital')
-                ->references('cnpj_hospital')->on('hospital')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
+            $table->foreign('cnes_hem', 'fk_funcionario_hemocentro')
+                ->references('cnes_hem')->on('hemocentro');
         });
     }
 

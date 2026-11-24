@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hemocentro', function (Blueprint $table) {
-            $table->char('cnes_hemocentro', 7)->primary();
-            $table->char('cnpj_hemocentro', 14)->unique();
-            $table->string('nome_hemocentro', 100);
-            $table->string('endereco_hemocentro', 200);
-            $table->string('contato_hemocentro', 255);
-            $table->string('senha_hemocentro', 100);
-            $table->timestamps();
+        Schema::create('hemocentro', function (Blueprint $table): void {
+            $table->char('cnes_hem', 7)->primary();
+            $table->char('cnpj_hem', 14)->unique();
+            $table->string('endereco_hem', 255);
+            $table->string('contato_hem', 20);
+            $table->string('senha_hem', 255);
         });
     }
 

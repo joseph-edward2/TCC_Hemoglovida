@@ -25,17 +25,17 @@
 
       <!--Links da navbar-->
       <nav>
-        <a href="Hospital_estoque.html">Estoque</a>
-        <a href="Hospital_pedidos.html" class="active">Pedidos</a>
+        <a href="{{ route('hospital.estoque') }}">Estoque</a>
+        <a href="{{ route('hospital.pedidos') }}" class="active">Pedidos</a>
       </nav>
     </div>
 
     <!--Ícone de usuário-->
     <div class="user">
-      Bem-vindo, Renato Gonçalves
-      <a href="Hospital_usuario.html">
+      Bem-vindo, {{ $nomeExibido() }}
+      <a href="{{ route('hospital.usuario') }}">
       <div class="avatar">
-        <img src="{{ asset('assets/avatar.jpg') }}" alt="Foto de perfil">
+        <img src="{{ $fotoPerfil() }}" alt="Foto de perfil">
       </div>
       </a>
     </div>
@@ -106,6 +106,7 @@
               <button type="button" class="blood-select__btn">B-</button>
               <button type="button" class="blood-select__btn">B+</button>
               <button type="button" class="blood-select__btn">AB-</button>
+              <button type="button" class="blood-select__btn">AB+</button>
             </div>
             <!-- Guarda o tipo escolhido pra enviar junto no formulário -->
             <input type="hidden" name="tipo_sanguineo" id="tipoSanguineoValor">
@@ -270,9 +271,11 @@
           <div class="info-banner__text">
             <h3>Como funciona o acompanhamento</h3>
             <p>
-              Cada requisição passa por até 5 etapas: recebida, em análise,
-              em separação, enviada e entregue. Acompanhe o status de cada
-              pedido em tempo real na tabela acima.
+              Cada pedido passa por até 5 etapas:
+              @foreach (\App\Enums\StatusPedido::cases() as $status)
+                {{ $status->label() }}{{ $loop->last ? '.' : ',' }}
+              @endforeach
+              Acompanhe o status de cada pedido em tempo real na tabela acima.
             </p>
           </div>
         </div>

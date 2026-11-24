@@ -190,6 +190,13 @@ main {
   color: var(--ink);
 }
 
+/* O campo de e-mail é editável; evita que .field input:not(:disabled)
+   pinte fundo e borda de "ativo" o tempo todo. */
+.field .input-with-btn input:not(:disabled):not(:focus) {
+  background: transparent;
+  border-color: transparent;
+}
+
 .input-with-btn .hint {
   font-size: 12.5px;
   color: var(--ink-soft);
@@ -228,12 +235,30 @@ main {
 
 /* BOTTOM ACTIONS */
 .bottom-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-items: stretch;
   margin-top: 10px;
-  flex-wrap: wrap;
   gap: 14px;
+}
+
+/* O form do "Sair" é um item da grade e precisa ocupar a mesma célula */
+.bottom-actions form {
+  display: flex;
+}
+
+/* Todos os botões da linha têm a mesma largura e altura */
+.bottom-actions .btn-solid,
+.bottom-actions .btn-logout,
+.bottom-actions form > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  font-size: 15px;
+  text-align: center;
 }
 
 .btn-solid {
@@ -257,22 +282,15 @@ main {
   margin-top: 8px;
 }
 
-.btn-outline-danger {
+.btn-logout {
   background: #fff;
-  border: 1.5px solid var(--ink-soft);
-  color: var(--ink);
+  border: 1.5px solid var(--line);
   border-radius: 999px;
-  padding: 14px 30px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  color: var(--ink);
   gap: 8px;
 }
 
-.btn-outline-danger:hover {
+.btn-logout:hover {
   border-color: var(--brand);
   color: var(--brand);
   background: var(--brand-light);
@@ -431,11 +449,6 @@ main {
   }
 
   .bottom-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .bottom-actions button {
-    width: 100%;
+    grid-template-columns: 1fr;
   }
 }

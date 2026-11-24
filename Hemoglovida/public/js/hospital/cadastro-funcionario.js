@@ -1,28 +1,26 @@
 /* ======================================================
-   HEMOGLOVIDA — CADASTRO DE FUNCIONÁRIO
+   HEMOGLOVIDA — CADASTRO DE FUNCIONÁRIO (HOSPITAL)
    ======================================================
    Importe DEPOIS do base.js:
+     <script src="../base.js"></script>
+     <script src="cadastro-funcionario.js"></script>
 
-   <script src="../base.js"></script>
-   <script src="cadastro-funcionario.js"></script>
-
-   Este arquivo contém apenas a lógica específica da tela
-   de cadastro de funcionário do hemocentro.
+   O envio é real: o form postinga na rota do atributo action.
    ====================================================== */
 
-
-// Seleciona os elementos do formulário que precisam de JS
-const form = document.getElementById('cadastroFuncionarioForm');
 const toggleBtn = document.getElementById('toggleSenha');
 const senhaInput = document.getElementById('senha_funcionario');
+const cpfInput = document.getElementById('cpf_funcionario');
 
+if (cpfInput) {
+  cpfInput.addEventListener('input', function () {
+    const digitos = cpfInput.value.replace(/\D/g, '').slice(0, 11);
 
-if (form) form.addEventListener('submit', async function (e) {
-  e.preventDefault();
-   setTimeout(function () {
-   mostrarMensagem(document.getElementById('msg'), 'Funcionário cadastrado com sucesso!', 'success');
-   window.location.href = 'Hospital_login.html';
-  }, 600);
-});
+    cpfInput.value = digitos
+      .replace(/^(\d{3})(\d)/, '$1.$2')
+      .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+      .replace(/\.(\d{3})(\d)/, '.$1-$2');
+  });
+}
 
 ativarToggleSenha(toggleBtn, senhaInput);

@@ -4,13 +4,12 @@
   <meta charset="UTF-8">
   <title>Hemoglovida | Hemocentro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hemocentro/login.css') }}">
 
 </head>
 <body>
 
-  <!-- Cabeçalho -->
   <header>
     <div class="header-left">
       <div class="logo">
@@ -20,10 +19,8 @@
     </div>
   </header>
 
-  <!-- Corpo -->
   <main class="page">
 
-    <!-- Bloco de identidade -->
     <section class="hero">
       <div class="hero__row">
         <div class="hero__badge">
@@ -34,9 +31,9 @@
       <h2 class="hero__subtitle">Hemocentro</h2>
     </section>
 
-    <!-- Cartão de login -->
     <section class="login-card">
-      <form id="loginForm" method="POST" novalidate>
+      <form id="loginForm" method="POST" action="{{ route('hemocentro.login.store') }}" novalidate>
+        @csrf
         <div class="field">
           <label class="field__label" for="login">Login</label>
           <input
@@ -44,7 +41,7 @@
             type="text"
             id="login"
             name="login"
-            placeholder="00.000.000/0001-00"
+            placeholder="CNES ou CPF"
             autocomplete="username"
             maxlength="18"
             inputmode="numeric">
@@ -57,7 +54,7 @@
               class="field__input field__input--password"
               type="password"
               id="senha"
-              name="senha"
+              name="password"
               placeholder="••••••••"
               autocomplete="current-password">
             <button type="button" class="field__toggle" id="toggleSenha" aria-label="Mostrar senha">
@@ -69,14 +66,14 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" href="Hem_Tela_Inicial.html">Entrar</button>
+        <button type="submit" class="btn btn-primary">Entrar</button>
       </form>
 
-      <p class="msg" id="msg" hidden></p>
+      <p class="msg{{ $errors->any() ? ' msg--error' : '' }}" id="msg" role="alert" @if (! $errors->any()) hidden @endif>{{ $errors->first() }}</p>
     </section>
 
   </main>
 
-  <script src="{{ asset('js/hemocentro/login.js') }}"></script>
+ <script src="{{ asset('js/hemocentro/login.js') }}"></script>
 </body>
 </html>

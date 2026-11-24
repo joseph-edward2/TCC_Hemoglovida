@@ -1,131 +1,92 @@
-// ===== Elementos da página =====
 const agendaEl = document.getElementById('agenda');
 const paginacaoEl = document.getElementById('paginacao');
 const linkTodos = document.getElementById('linkTodos');
 const btnConfirmarChegada = document.getElementById('btnConfirmarChegada');
 const btnDoacaoRealizada = document.getElementById('btnDoacaoRealizada');
+const attendanceFeedback = document.getElementById('attendanceFeedback');
 
-// ===== Dados dos agendamentos =====
-// TODO: substituir por uma chamada fetch() à API real
 const agendamentos = [
   { nome: 'Maria Silva', horario: '08:00', status: 'Finalizado' },
-  { nome: 'Jesse Pinkman', horario: '09:30', status: 'Em Andamento' },
+  { nome: 'Jesse Pinkman', horario: '09:30', status: 'Agendado' },
   { nome: 'Ana Souza', horario: '10:15', status: 'Agendado' },
   { nome: 'Carlos Pereira', horario: '11:00', status: 'Agendado' },
   { nome: 'Fernanda Costa', horario: '13:30', status: 'Atrasado' },
   { nome: 'Pedro Almeida', horario: '14:45', status: 'Agendado' },
   { nome: 'Juliana Ramos', horario: '16:00', status: 'Agendado' },
-  { nome: 'Roberto Nunes', horario: '17:30', status: 'Agendado' }
+  { nome: 'Roberto Nunes', horario: '17:30', status: 'Agendado' },
 ];
 
 const ITENS_POR_PAGINA = 6;
-const CORES_INICIAIS = ['#e2e0de', '#e2e0de', '#e2e0de', '#e2e0de', '#e2e0de', '#e2e0de'];
-
+const STATUS_CLASSE = { Agendado: 'badge-status--agendado', 'Em Andamento': 'badge-status--em-andamento', Atrasado: 'badge-status--atrasado', Finalizado: 'badge-status--finalizado' };
 let paginaAtual = 1;
+let atendimentoConfirmado = false;
 
-// ===== Gera as iniciais do nome =====
 function iniciaisDe(nome) {
   const partes = nome.trim().split(/\s+/);
-  const primeira = partes[0].charAt(0);
-  const ultima = partes[partes.length - 1].charAt(0);
-  return (primeira + ultima).toUpperCase();
+  return (partes[0].charAt(0) + partes.at(-1).charAt(0)).toUpperCase();
 }
 
-// ===== Classe de status de cada agendamento =====
-const STATUS_CLASSE = {
-  'Agendado': 'badge-status--agendado',
-  'Em Andamento': 'badge-status--em-andamento',
-  'Atrasado': 'badge-status--atrasado',
-  'Finalizado': 'badge-status--finalizado'
-};
-
-// ===== Renderiza a lista da página atual =====
 function renderizarAgenda() {
   const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
   const itensPagina = agendamentos.slice(inicio, inicio + ITENS_POR_PAGINA);
-
-  agendaEl.innerHTML = itensPagina.map((item, index) => {
-    const cor = CORES_INICIAIS[(inicio + index) % CORES_INICIAIS.length];
-    return `
-      <li class="agenda__item">
-        <span class="agenda__iniciais" style="background-color: ${cor}">${iniciaisDe(item.nome)}</span>
-        <span class="agenda__nome">${item.nome}</span>
-        <span class="agenda__horario">${item.horario}</span>
-        <span class="badge-status ${STATUS_CLASSE[item.status] || ''}">${item.status}</span>
-      </li>
-    `;
-  }).join('');
-
+  agendaEl.innerHTML = itensPagina.map((item) => `
+    <li class="agenda__item">
+      <span class="agenda__iniciais">${iniciaisDe(item.nome)}</span>
+      <span class="agenda__nome">${item.nome}</span><span class="agenda__horario">${item.horario}</span>
+      <span class="badge-status ${STATUS_CLASSE[item.status] || ''}">${item.status}</span>
+    </li>`).join('');
   renderizarPaginacao();
 }
 
-// ===== Renderiza os botões de página =====
 function renderizarPaginacao() {
   const totalPaginas = Math.ceil(agendamentos.length / ITENS_POR_PAGINA);
-
-  if (totalPaginas <= 1) {
-    paginacaoEl.innerHTML = '';
-    return;
-  }
-
-  let html = `<button class="paginacao__botao" data-pagina="anterior" ${paginaAtual === 1 ? 'disabled' : ''}>&#8249;</button>`;
-
-  for (let i = 1; i <= totalPaginas; i++) {
-    const ativo = i === paginaAtual ? ' paginacao__botao--ativo' : '';
-    html += `<button class="paginacao__botao${ativo}" data-pagina="${i}">${i}</button>`;
-  }
-
-  html += `<button class="paginacao__botao" data-pagina="proxima" ${paginaAtual === totalPaginas ? 'disabled' : ''}>&#8250;</button>`;
-
-  paginacaoEl.innerHTML = html;
+  let html = `<button class="paginacao__botao" data-pagina="anterior" ${paginaAtual === 1 ? 'disabled' : ''} aria-label="Página anterior">&#8249;</button>`;
+  for (let pagina = 1; pagina <= totalPaginas; pagina += 1) html += `<button class="paginacao__botao${pagina === paginaAtual ? ' paginacao__botao--ativo' : ''}" data-pagina="${pagina}">${pagina}</button>`;
+  paginacaoEl.innerHTML = `${html}<button class="paginacao__botao" data-pagina="proxima" ${paginaAtual === totalPaginas ? 'disabled' : ''} aria-label="Próxima página">&#8250;</button>`;
 }
 
-// ===== Clique nos botões de página =====
 paginacaoEl.addEventListener('click', (event) => {
   const botao = event.target.closest('.paginacao__botao');
   if (!botao || botao.disabled) return;
-
   const totalPaginas = Math.ceil(agendamentos.length / ITENS_POR_PAGINA);
-  const acao = botao.dataset.pagina;
-
-  if (acao === 'anterior') paginaAtual--;
-  else if (acao === 'proxima') paginaAtual++;
-  else paginaAtual = Number(acao);
-
-  if (paginaAtual < 1) paginaAtual = 1;
-  if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
-
+  paginaAtual = botao.dataset.pagina === 'anterior' ? paginaAtual - 1 : botao.dataset.pagina === 'proxima' ? paginaAtual + 1 : Number(botao.dataset.pagina);
+  paginaAtual = Math.max(1, Math.min(paginaAtual, totalPaginas));
   renderizarAgenda();
 });
 
-// ===== Ações do atendimento =====
-// Envia a ação para a API (POST)
-async function enviarAcao(endpoint, payload) {
-  try {
-    // TODO: substituir pela URL real da API
-    const resposta = await fetch('https://api.exemplo.com/' + endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!resposta.ok) throw new Error('Falha na solicitação.');
-
-    console.log('Ação enviada:', payload);
-  } catch (erro) {
-    alert('Não foi possível concluir a ação. Tente novamente.');
-  }
-}
-
 btnConfirmarChegada.addEventListener('click', () => {
-  // TODO: ajustar o payload conforme a API real
-  enviarAcao('atendimento/confirmar-chegada', { paciente: 'João Pedro Lima' });
+  if (atendimentoConfirmado) return;
+  atendimentoConfirmado = true;
+  agendamentos[1].status = 'Em Andamento';
+  btnConfirmarChegada.textContent = 'Presença confirmada';
+  btnConfirmarChegada.disabled = true;
+  btnDoacaoRealizada.disabled = false;
+  attendanceFeedback.textContent = 'Presença de Jesse Pinkman confirmada. Agora registre o resultado da doação.';
+  atualizarEtapa(1);
+  renderizarAgenda();
 });
 
 btnDoacaoRealizada.addEventListener('click', () => {
-  // TODO: ajustar o payload conforme a API real
-  enviarAcao('atendimento/doacao-realizada', { paciente: 'João Pedro Lima' });
+  if (!atendimentoConfirmado || !window.confirm('Confirmar que a doação de Jesse Pinkman foi realizada?')) return;
+  agendamentos[1].status = 'Finalizado';
+  btnDoacaoRealizada.textContent = 'Doação confirmada';
+  btnDoacaoRealizada.disabled = true;
+  attendanceFeedback.textContent = 'Doação confirmada com sucesso. O status do atendimento foi atualizado para concluído.';
+  atualizarEtapa(2);
+  renderizarAgenda();
 });
 
-// ===== Renderização inicial =====
+function atualizarEtapa(etapaAtual) {
+  document.querySelectorAll('.step').forEach((step, indice) => {
+    const circle = step.querySelector('.step__circle');
+    const label = step.querySelector('.step__label');
+    circle.classList.toggle('step__circle--done', indice < etapaAtual);
+    circle.classList.toggle('step__circle--current', indice === etapaAtual);
+    label.classList.toggle('step__label--current', indice === etapaAtual);
+    if (indice < etapaAtual) circle.innerHTML = '&#10003;';
+  });
+  document.querySelectorAll('.step__line').forEach((line, indice) => line.classList.toggle('step__line--done', indice < etapaAtual));
+}
+
+linkTodos.textContent = 'Ver todos os agendamentos';
 renderizarAgenda();

@@ -283,6 +283,10 @@
   padding-bottom: 4px;
 }
 
+.chart-card { position:relative; }
+.chart-scale { position:absolute; left:12px; top:108px; height:161px; display:flex; flex-direction:column; justify-content:space-between; color:var(--ink-soft); font-size:10px; }
+.chart-card .bar-chart { margin-left:28px; background:repeating-linear-gradient(to top, transparent 0, transparent 39px, #eee 40px); }
+
 .bar-chart__week {
   display: flex;
   flex-direction: column;
@@ -301,6 +305,9 @@
   width: 24px;
   border-radius: 4px 4px 0 0;
 }
+
+.bar-chart__bar { position:relative; }
+.bar-chart__bar span { position:absolute; top:-18px; left:50%; transform:translateX(-50%); color:var(--ink-soft); font-size:10px; font-weight:700; }
 
 .bar-chart__bar--saidas {
   background-color: var(--brand);

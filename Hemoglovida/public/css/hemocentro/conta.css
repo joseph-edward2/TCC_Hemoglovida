@@ -101,7 +101,37 @@ main{ padding: 40px; max-width:980px; margin:0 auto; }
 
 /* BOTTOM ACTIONS */
 .bottom-actions{
-  display:flex; align-items:center; justify-content:space-between; margin-top:10px; flex-wrap:wrap; gap:14px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  align-items:stretch;
+  margin-top:10px;
+  gap:14px;
+}
+
+/* O form do "Sair" é um item da grade e precisa ocupar a mesma célula */
+.bottom-actions form{ display:flex; }
+
+/* Todos os botões da linha têm a mesma largura e altura */
+.bottom-actions .btn-solid,
+.bottom-actions .btn-logout,
+.bottom-actions form > button{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:100%; min-height:48px; padding:12px 14px;
+  font-size:15px; text-align:center;
+}
+
+/* O "Sair" usava .btn-logout, que não tinha estilo nenhum */
+.bottom-actions .btn-logout{
+  background:#fff;
+  border:1.5px solid var(--line);
+  border-radius:999px;
+  color:var(--ink);
+  gap:8px;
+}
+.bottom-actions .btn-logout:hover{
+  border-color:var(--brand);
+  color:var(--brand);
+  background:var(--brand-light);
 }
 .btn-solid{
   background: var(--brand); color:#fff; border:none; border-radius:999px;
@@ -184,6 +214,5 @@ footer{ background: var(--brand); color:#fff; margin-top:50px; padding: 40px 40p
   main{ padding:20px; }
   .grid-2{ grid-template-columns:1fr; }
   .profile-head{ flex-direction:column; align-items:flex-start; }
-  .bottom-actions{ flex-direction:column; align-items:stretch; }
-  .bottom-actions button{ width:100%; }
+  .bottom-actions{ grid-template-columns:1fr; }
 }

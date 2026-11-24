@@ -48,6 +48,15 @@
   min-height: 420px;
 }
 
+.attendance-feedback{
+  flex-basis:100%;
+  min-height:20px;
+  margin:12px 0 0;
+  color:var(--ink-soft);
+  font-size:13px;
+  line-height:1.4;
+}
+
 .card--observacoes{ padding: 14px 20px; }
 .card--observacoes .card__header{ margin-bottom: 10px; }
 .card--observacoes .alerta{ padding: 10px 12px; }

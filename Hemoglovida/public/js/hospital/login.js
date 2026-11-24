@@ -1,31 +1,28 @@
-// Máscara automática de CPF/CNPJ
 const loginInput = document.getElementById('login');
+const senhaInput = document.getElementById('senha');
+const toggleBtn = document.getElementById('toggleSenha');
+const form = document.getElementById('loginForm');
+const msgEl = document.getElementById('msg');
 
 loginInput.addEventListener('input', function () {
-  // Remove tudo que não é número
-  let v = this.value.replace(/\D/g, '');
+  const digits = this.value.replace(/\D/g, '').slice(0, 14);
 
-  if (v.length > 14) v = v.slice(0, 14);
+  if (digits.length <= 11) {
+    this.value = digits.length <= 7
+      ? digits
+      : digits
+        .replace(/^(\d{3})(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 
-  // CPF: 000.000.000-00
-  if (v.length <= 11) {
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  } else {
-    // CNPJ: 00.000.000/0001-00
-    v = v.replace(/^(\d{2})(\d)/, '$1.$2');
-    v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-    v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
-    v = v.replace(/(\d{4})(\d)/, '$1-$2');
+    return;
   }
 
-  this.value = v;
+  this.value = digits
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2');
 });
-
-// Mostrar / ocultar senha
-const toggleBtn = document.getElementById('toggleSenha');
-const senhaInput = document.getElementById('senha');
 
 toggleBtn.addEventListener('click', function () {
   const isPassword = senhaInput.type === 'password';
@@ -33,53 +30,83 @@ toggleBtn.addEventListener('click', function () {
   this.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Mostrar senha');
 });
 
-// Validação e envio do formulário
-const form = document.getElementById('loginForm');
-const msgEl = document.getElementById('msg');
-
-form.addEventListener('submit', async function (e) {
-  e.preventDefault();
-
-  // Limpa mensagem anterior
+form.addEventListener('submit', function (e) {
   msgEl.hidden = true;
   msgEl.textContent = '';
   msgEl.className = 'msg';
 
-  // Remove formatação para validar
-  const doc = loginInput.value.replace(/\D/g, '');
-  const senha = senhaInput.value;
-
-  // Validação simples
-  if (doc.length < 11) {
-    showError('Informe um CNPJ válido.');
+  if (!validarDocumento(loginInput.value.trim())) {
+    e.preventDefault();
+    showError('Informe um CNPJ de 14 dígitos ou um CPF válido.');
+    loginInput.focus();
     return;
   }
 
-  if (senha.length < 6) {
-    showError('A senha deve ter pelo menos 6 caracteres.');
+  if (!senhaInput.value) {
+    e.preventDefault();
+    showError('Informe uma senha válida.');
+    senhaInput.focus();
     return;
   }
 
-  // Desabilita botão durante envio
   const btn = form.querySelector('.btn');
   btn.disabled = true;
   btn.textContent = 'Entrando…';
-
-
-  setTimeout(function () {
-    showSuccess('Login realizado com sucesso!');
-    window.location.href = 'Hospital_estoque.html';
-  }, 600);
 });
+
+function validarDocumento(value) {
+  const digits = value.replace(/[.\/-]/g, '');
+
+  if (/^\d{11}$/.test(digits)) {
+    return validarCpf(digits);
+  }
+
+  if (/^\d{14}$/.test(digits)) {
+    return validarCnpj(digits);
+  }
+
+  return false;
+}
+
+function validarCpf(value) {
+  if (/^(\d)\1{10}$/.test(value)) {
+    return false;
+  }
+
+  return calcularDigitoCpf(value.slice(0, 9)) === Number(value[9])
+    && calcularDigitoCpf(value.slice(0, 10)) === Number(value[10]);
+}
+
+function calcularDigitoCpf(base) {
+  const soma = [...base].reduce((total, digito, indice) =>
+    total + Number(digito) * (base.length + 1 - indice), 0);
+  const resto = soma % 11;
+
+  return resto < 2 ? 0 : 11 - resto;
+}
+
+function validarCnpj(value) {
+  if (/^(\d)\1{13}$/.test(value)) {
+    return false;
+  }
+
+  return calcularDigitoCnpj(value.slice(0, 12)) === Number(value[12])
+    && calcularDigitoCnpj(value.slice(0, 13)) === Number(value[13]);
+}
+
+function calcularDigitoCnpj(base) {
+  const weights = base.length === 12
+    ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  const soma = [...base].reduce((total, digito, indice) =>
+    total + Number(digito) * weights[indice], 0);
+  const resto = soma % 11;
+
+  return resto < 2 ? 0 : 11 - resto;
+}
 
 function showError(text) {
   msgEl.textContent = text;
   msgEl.className = 'msg msg--error';
-  msgEl.hidden = false;
-}
-
-function showSuccess(text) {
-  msgEl.textContent = text;
-  msgEl.className = 'msg msg--success';
   msgEl.hidden = false;
 }

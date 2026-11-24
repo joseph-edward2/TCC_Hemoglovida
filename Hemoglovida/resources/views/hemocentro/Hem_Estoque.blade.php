@@ -22,21 +22,21 @@
 
     <!--Links da navbar-->
     <nav>
-      <a href="Hem_Tela_Inicial.html">Visão Geral</a>
-      <a href="Hem_Atendimento.html">Atendimento</a>
-      <a href="Hem_Estoque.html" class="active">Estoque</a>
-      <a href="Hem_Agendamento.html">Agendamentos</a>
-      <a href="Hem_Pedidos.html">Pedidos</a>
-      <a href="Hem_Alertas.html">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php" class="active">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
     </nav>
   </div>
 
   <!--Ícone de usuário-->
     <div class="user">
-     <span>Bem-vindo, Dr. Walter White</span>
-      <a href="Hem_Usuario.html">
+     <span>Bem-vindo, {{ $nomeExibido() }}</span>
+      <a href="Hem_Usuario.blade.php">
       <div class="avatar">
-        <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
+        <img src="{{ $fotoPerfil() }}" alt="Foto do usuário">
       </div>
       </a>
     </div>
@@ -215,7 +215,7 @@
         </div>
       </div>
 
-      <a href="Hem_Triagem.html" class="btn btn-primary btn-block"><i class="ph ph-flask"></i> Triagem de Bolsas</a>
+      <a href="Hem_Triagem.blade.php" class="btn btn-primary btn-block"><i class="ph ph-flask"></i> Triagem de Bolsas</a>
     </div>
 
     <!--Inventário Detalhado-->

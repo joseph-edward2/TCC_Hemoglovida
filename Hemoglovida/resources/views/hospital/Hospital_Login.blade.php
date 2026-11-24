@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hemoglovida | Hemocentro</title>
+  <title>Hemoglovida | Hospital</title>
   <link rel="stylesheet" href="{{ asset('css/hospital/base.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hospital/login.css') }}">
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
@@ -37,7 +37,8 @@
 
     <!-- Cartão de login -->
     <section class="card">
-      <form id="loginForm" method="POST" novalidate>
+      <form id="loginForm" method="POST" action="{{ route('hospital.login.store') }}" novalidate>
+        @csrf
         <div class="field">
           <label class="field__label" for="login">Login</label>
           <input
@@ -45,7 +46,7 @@
             type="text"
             id="login"
             name="login"
-            placeholder="00.000.000/0001-00"
+            placeholder="CNPJ ou CPF"
             autocomplete="username"
             maxlength="18"
             inputmode="numeric">
@@ -58,7 +59,7 @@
               class="field__input field__input--password"
               type="password"
               id="senha"
-              name="senha"
+              name="password"
               placeholder="••••••••"
               autocomplete="current-password">
             <button type="button" class="field__toggle" id="toggleSenha" aria-label="Mostrar senha">
@@ -69,8 +70,7 @@
         <button type="submit" class="btn">Entrar</button> 
       </form>
 
-      <p class="msg" id="msg" hidden>
-      </p>
+      <p class="msg{{ $errors->any() ? ' msg--error' : '' }}" id="msg" role="alert" @if (! $errors->any()) hidden @endif>{{ $errors->first() }}</p>
      
     </section>
 

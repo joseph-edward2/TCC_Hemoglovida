@@ -9,21 +9,10 @@ function showToast(msg){
 }
 
 // ---------- CAMPOS "ALTERAR" (email / telefone) ----------
+// Os campos já são editáveis; o botão apenas confirma a alteração.
 document.querySelectorAll('.btn-alterar').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    const input = document.getElementById(btn.dataset.target);
-    const editing = !input.disabled;
-    if(editing){
-      input.disabled = true;
-      btn.textContent = 'Alterar';
-      btn.classList.remove('editing');
-      showToast('Informação atualizada com sucesso.');
-    } else {
-      input.disabled = false;
-      input.focus();
-      btn.textContent = 'Salvar';
-      btn.classList.add('editing');
-    }
+    showToast('Informação atualizada com sucesso.');
   });
 });
 
@@ -74,19 +63,3 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
   showToast('Alterações salvas com sucesso!');
 });
 
-// ---------- REDIRECIONAR CADASTRO FUNCIONÁRIO ----------
-document.getElementById('cadastrofun').addEventListener('click', () => {
-  window.location.href = 'Hemocentro_cadastro_funcionario.html';
-});
-
-// ---------- ENCERRAR CONTA ----------
-const deleteOverlay = document.getElementById('deleteOverlay');
-document.getElementById('deleteAccountBtn').addEventListener('click', ()=> deleteOverlay.classList.add('show'));
-document.getElementById('deleteClose').addEventListener('click', ()=> deleteOverlay.classList.remove('show'));
-document.getElementById('cancelDelete').addEventListener('click', ()=> deleteOverlay.classList.remove('show'));
-deleteOverlay.addEventListener('click', (e)=>{ if(e.target === deleteOverlay) deleteOverlay.classList.remove('show'); });
-
-document.getElementById('confirmDelete').addEventListener('click', ()=>{
-  deleteOverlay.classList.remove('show');
-  showToast('Conta encerrada com sucesso.');
-});
