@@ -175,7 +175,7 @@
       </div>
     </section>
 
-    <section class="section-campaigns">
+    <section class="section-campaigns expired-notifications">
       <h2 class="section-title">Notificações expiradas</h2>
       @forelse ($expiredEvents as $event)
         <article class="card">

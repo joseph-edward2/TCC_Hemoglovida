@@ -508,6 +508,18 @@ body {
   margin-top: 10px;
 }
 
+.expired-notifications {
+  padding-top: 3px;
+}
+
+.expired-notifications > .card {
+  padding-block: 12px;
+}
+
+.expired-notifications > .card + .card {
+  margin-top: 5px;
+}
+
 .section-title {
   font-size: 20px;
   font-weight: 700;
