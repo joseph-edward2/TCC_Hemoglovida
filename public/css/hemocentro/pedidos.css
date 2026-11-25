@@ -467,6 +467,17 @@ nav a:hover{ color:#fff; }
 .modal .close:hover{ background:var(--bg); color:var(--ink); }
 
 .modal h2{ margin:0 0 18px 0; font-size:22px; }
+.motivo-recusa{ display:block; box-sizing:border-box; width:100%; margin-top:8px; padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; resize: none; }
+
+.bolsas-scroll{ max-height:min(44dvh, 22rem); overflow-y:auto; overscroll-behavior:contain; border:1px solid var(--line); border-radius:8px; padding:0 12px; }
+.bolsa-opcao{ display:flex; align-items:center; gap:12px; padding:12px 0; cursor:pointer; }
+.bolsa-opcao + .bolsa-opcao{ border-top:1px solid var(--line); }
+.bolsa-opcao input{ accent-color:var(--brand); }
+[data-reserva] button:disabled{ opacity:.55; cursor:default; }
+
+.requisicao-actions{ display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap; margin-top:16px; }
+.requisicao-actions span, .requisicao-actions button:disabled{ color:var(--ink-soft); }
+.requisicao-actions button:disabled{ cursor:default; }
 
 .details-body .d-row{
   display:flex;

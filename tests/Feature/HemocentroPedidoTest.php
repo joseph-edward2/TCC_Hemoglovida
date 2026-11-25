@@ -44,7 +44,10 @@ test('mostra os pedidos, as etapas e os totais do hemocentro nas duas formas de 
 
     $pagina = HTMLDocument::createFromString($resposta->getContent(), LIBXML_NOERROR);
     expect($pagina->querySelector("#criticalList #pedido-{$critico} [aria-current=step]")->textContent)->toContain('Em Separação');
-    expect($pagina->querySelector("#detalhes-{$critico} a")->getAttribute('href'))->toBe('https://hospital.example.test/requisicoes/42.pdf');
+    $botao = $pagina->querySelector("#detalhes-{$critico} > footer:last-child a");
+    expect($botao->textContent)->toBe('Ver requisição');
+    expect($botao->getAttribute('href'))->toBe('https://hospital.example.test/requisicoes/42.pdf');
+    expect($pagina->querySelector("#detalhes-{$pendente} > footer:last-child button[disabled]")->textContent)->toBe('Ver requisição');
     expect($pagina->querySelector("#recentList #detalhes-{$entregue} a")->getAttribute('href'))->toBe(url('/storage/requisicoes/local.pdf'));
     expect($pagina->querySelector("#recentList #detalhes-{$pendente}")->textContent)->toContain('Não informado');
 })->with(['hemocentro', 'funcionario']);
@@ -77,12 +80,16 @@ test('registra quem aceitou e conta o envio uma vez mesmo ao repetir a ação de
     $this->travelTo(Carbon::parse('2026-11-25 02:59:00', 'UTC'));
     $responsavel = Funcionario::factory()->create();
     $tecnico = Funcionario::factory()->create(['cnes_hem' => $responsavel->cnes_hem]);
-    $pedido = criarPedidoHospitalar($responsavel, ['urgencia_ped' => 'critica']);
+    $pedido = criarPedidoHospitalar($responsavel, ['urgencia_ped' => 'critica', 'tipo_sanguineo_ped' => 'O-']);
+    DB::table('bolsa_sangue')->insert(['isbt' => 'B-1', 'cnes_hem' => $tecnico->cnes_hem, 'quant_bolsa' => 2, 'tipo_bolsa' => 'O-', 'disponibilidade_bolsa' => 'Disponível']);
     $acao = route('hemocentro.pedidos.status', $pedido);
     $pagina = route('hemocentro.pedidos', ['urgencia' => 'critica']);
 
-    $this->actingAs($tecnico, 'funcionario')->from($pagina)->patch($acao, ['status' => 'em_separacao'])
+    $this->actingAs($tecnico, 'funcionario')->get(route('hemocentro.pedidos.bolsas', $pedido))->assertOk()->assertSeeText('ISBT B-1');
+    $this->from($pagina)->patch($acao, ['status' => 'em_separacao', 'bolsas' => ['B-1' => 1]])
         ->assertRedirect($pagina)->assertSessionHasNoErrors();
+    $this->assertDatabaseHas('pedido_bolsa', ['id_ped' => $pedido, 'isbt' => 'B-1', 'quantidade' => 1]);
+    $this->assertDatabaseHas('bolsa_sangue', ['isbt' => 'B-1', 'quant_bolsa' => 1, 'disponibilidade_bolsa' => 'disponivel']);
     $this->assertDatabaseHas('pedido', ['id_ped' => $pedido, 'status_ped' => 'em_separacao', 'cod_reg_fun' => $tecnico->cod_reg_fun, 'data_hora_envio_ped' => null]);
 
     $this->patch($acao, ['status' => 'enviado'])->assertRedirect($pagina)->assertSessionHasNoErrors();
@@ -97,19 +104,55 @@ test('registra quem aceitou e conta o envio uma vez mesmo ao repetir a ação de
 test('mantém o técnico do pedido quando a conta do hemocentro aceita a separação', function () {
     $hemocentro = Hemocentro::factory()->create();
     $funcionario = Funcionario::factory()->create(['cnes_hem' => $hemocentro->cnes_hem]);
-    $pedido = criarPedidoHospitalar($funcionario);
+    $pedido = criarPedidoHospitalar($funcionario, ['tipo_sanguineo_ped' => 'A+']);
+    DB::table('bolsa_sangue')->insert(['isbt' => 'A-1', 'cnes_hem' => $hemocentro->cnes_hem, 'quant_bolsa' => 1, 'tipo_bolsa' => 'A+', 'disponibilidade_bolsa' => 'disponivel']);
 
-    $this->actingAs($hemocentro, 'hemocentro')->patch(route('hemocentro.pedidos.status', $pedido), ['status' => 'em_separacao'])
+    $this->actingAs($hemocentro, 'hemocentro')->patch(route('hemocentro.pedidos.status', $pedido), ['status' => 'em_separacao', 'bolsas' => ['A-1' => 1]])
         ->assertRedirectToRoute('hemocentro.pedidos')->assertSessionHasNoErrors();
+    $this->assertDatabaseHas('bolsa_sangue', ['isbt' => 'A-1', 'quant_bolsa' => 0, 'disponibilidade_bolsa' => 'reservado']);
     $this->assertDatabaseHas('pedido', ['id_ped' => $pedido, 'status_ped' => 'em_separacao', 'cod_reg_fun' => $funcionario->cod_reg_fun]);
+});
+
+test('filtra o estoque do hemocentro e desfaz toda a reserva se uma bolsa ficar indisponível', function () {
+    $funcionario = Funcionario::factory()->create();
+    $externo = Funcionario::factory()->create();
+    $pedido = criarPedidoHospitalar($funcionario, ['tipo_sanguineo_ped' => 'O-', 'quant_ped' => 2]);
+    $base = ['tipo_bolsa' => 'O-', 'cnes_hem' => $funcionario->cnes_hem, 'quant_bolsa' => 1, 'disponibilidade_bolsa' => 'disponivel', 'data_venc_bolsa' => null];
+    foreach ([
+        'B1' => [], 'B2' => [], 'EXTERNA' => ['cnes_hem' => $externo->cnes_hem],
+        'VENCIDA' => ['data_venc_bolsa' => '2000-01-01'], 'OUTRO-TIPO' => ['tipo_bolsa' => 'O+'],
+        'SEM-SALDO' => ['quant_bolsa' => 0], 'ANALISE' => ['disponibilidade_bolsa' => 'em_analise'],
+    ] as $isbt => $dados) {
+        DB::table('bolsa_sangue')->insert(['isbt' => $isbt] + $dados + $base);
+    }
+    $this->actingAs($externo, 'funcionario')->get(route('hemocentro.pedidos.bolsas', $pedido))->assertNotFound();
+    $this->actingAs($funcionario, 'funcionario')->get(route('hemocentro.pedidos.bolsas', $pedido))
+        ->assertOk()->assertSeeText(['ISBT B1', 'ISBT B2'])->assertDontSeeText(['EXTERNA', 'VENCIDA', 'OUTRO-TIPO', 'SEM-SALDO', 'ANALISE']);
+    DB::table('bolsa_sangue')->where('isbt', 'B2')->update(['disponibilidade_bolsa' => 'reservado']);
+    $this->patch(route('hemocentro.pedidos.status', $pedido), ['status' => 'em_separacao', 'bolsas' => ['B1' => 1, 'B2' => 1]])
+        ->assertSessionHasErrors('bolsas');
+    $this->assertDatabaseEmpty('pedido_bolsa');
+    $this->assertDatabaseHas('bolsa_sangue', ['isbt' => 'B1', 'quant_bolsa' => 1]);
+    $this->assertDatabaseHas('pedido', ['id_ped' => $pedido, 'status_ped' => 'pendente']);
 });
 
 test('preserva o pedido recusado no histórico e o retira da fila crítica', function () {
     $funcionario = Funcionario::factory()->create();
     $pedido = criarPedidoHospitalar($funcionario, ['urgencia_ped' => 'critica', 'desc_ped' => 'Pedido para recusar']);
 
-    $this->actingAs($funcionario, 'funcionario')->patch(route('hemocentro.pedidos.status', $pedido), ['status' => 'recusado'])
+    $this->actingAs($funcionario, 'funcionario')->from(route('hemocentro.pedidos'))
+        ->patch(route('hemocentro.pedidos.status', $pedido), ['status' => 'recusado', 'motivo' => '   '])
+        ->assertSessionHasErrors('motivo');
+    $this->assertDatabaseHas('pedido', ['id_ped' => $pedido, 'status_ped' => 'pendente']);
+    $this->assertDatabaseEmpty('mensagem_recusa_pedido');
+
+    $this->get(route('hemocentro.pedidos'))->assertOk()->assertSeeText(['Motivo da recusa', 'Enviar', 'Cancelar']);
+    $this->patch(route('hemocentro.pedidos.status', $pedido), ['status' => 'recusado', 'motivo' => 'Estoque insuficiente.', 'cnpj_hosp' => '99999999999999'])
         ->assertRedirectToRoute('hemocentro.pedidos')->assertSessionHasNoErrors();
+    $this->patch(route('hemocentro.pedidos.status', $pedido), ['status' => 'recusado', 'motivo' => 'Outro motivo.'])
+        ->assertRedirectToRoute('hemocentro.pedidos');
+    $this->assertDatabaseCount('mensagem_recusa_pedido', 1);
+    $this->assertDatabaseHas('mensagem_recusa_pedido', ['id_ped' => $pedido, 'cnpj_hosp' => '00000000000001', 'motivo' => 'Estoque insuficiente.']);
     $this->assertDatabaseHas('pedido', ['id_ped' => $pedido, 'status_ped' => 'recusado', 'data_hora_envio_ped' => null]);
     $this->get(route('hemocentro.pedidos', ['status' => 'recusado']))->assertOk()
         ->assertSeeTextInOrder(['Nenhum pedido crítico encontrado.', 'Pedidos Recentes', 'Pedido para recusar'])

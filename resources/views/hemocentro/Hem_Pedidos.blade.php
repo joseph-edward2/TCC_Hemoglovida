@@ -185,6 +185,11 @@
     <div class="load-more-wrap"><a class="load-more" data-lista="recentList" href="{{ $recentes->nextPageUrl() }}">Carregar mais pedidos <i class="ph ph-caret-down"></i></a></div>
   @endif
 </main>
+<dialog class="modal" id="separar-pedido" aria-labelledby="titulo-separacao" closedby="any">
+  <form method="dialog"><button class="close" aria-label="Fechar"><i class="ph ph-x"></i></button></form>
+  <h2 id="titulo-separacao">Selecionar bolsas</h2>
+  <div id="opcoes-bolsas" aria-live="polite"></div>
+</dialog>
 
 @if (session('status'))
   <div class="toast show" id="toast" role="status">{{ session('status') }}</div>

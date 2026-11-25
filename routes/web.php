@@ -51,6 +51,8 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
             ->whereNumber('protocolo')->name('atendimento.concluir');
         Route::get('/Hem_Estoque.blade.php', HemocentroEstoqueController::class)->name('estoque');
         Route::get('/Hem_Pedidos.blade.php', [HemocentroPedidoController::class, 'index'])->name('pedidos');
+        Route::get('/pedidos/{pedido}/bolsas', [HemocentroPedidoController::class, 'bolsas'])
+            ->whereNumber('pedido')->name('pedidos.bolsas');
         Route::patch('/pedidos/{pedido}/status', [HemocentroPedidoController::class, 'status'])
             ->whereNumber('pedido')->name('pedidos.status');
         Route::get('/Hem_Tela_Inicial.blade.php', HemocentroDashboardController::class)->name('inicio');
