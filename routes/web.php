@@ -5,6 +5,7 @@ use App\Http\Controllers\HemocentroAlertaController;
 use App\Http\Controllers\HemocentroAtendimentoController;
 use App\Http\Controllers\HemocentroDashboardController;
 use App\Http\Controllers\HemocentroEstoqueController;
+use App\Http\Controllers\HemocentroPedidoController;
 use App\Http\Controllers\HemocentroSessionController;
 use App\Http\Controllers\HemocentroTriagemController;
 use Illuminate\Support\Facades\Route;
@@ -49,7 +50,9 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
         Route::post('/atendimento/{protocolo}/doacao-realizada', [HemocentroAtendimentoController::class, 'concluir'])
             ->whereNumber('protocolo')->name('atendimento.concluir');
         Route::get('/Hem_Estoque.blade.php', HemocentroEstoqueController::class)->name('estoque');
-        Route::view('/Hem_Pedidos.blade.php', 'hemocentro.Hem_Pedidos')->name('pedidos');
+        Route::get('/Hem_Pedidos.blade.php', [HemocentroPedidoController::class, 'index'])->name('pedidos');
+        Route::patch('/pedidos/{pedido}/status', [HemocentroPedidoController::class, 'status'])
+            ->whereNumber('pedido')->name('pedidos.status');
         Route::get('/Hem_Tela_Inicial.blade.php', HemocentroDashboardController::class)->name('inicio');
         Route::get('/Hem_Triagem.blade.php', [HemocentroTriagemController::class, 'index'])->name('triagem');
         Route::post('/triagem/{isbt}/laudo', [HemocentroTriagemController::class, 'anexar'])->name('triagem.anexar');
