@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HemocentroAgendamentoController;
+use App\Http\Controllers\HemocentroAlertaController;
 use App\Http\Controllers\HemocentroAtendimentoController;
 use App\Http\Controllers\HemocentroDashboardController;
 use App\Http\Controllers\HemocentroEstoqueController;
@@ -34,7 +35,14 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
         Route::post('/sair', [HemocentroSessionController::class, 'destroy'])->name('logout');
         Route::get('/Hem_Agendamento.blade.php', [HemocentroAgendamentoController::class, 'index'])->name('agendamento');
         Route::put('/agendamento', [HemocentroAgendamentoController::class, 'update'])->name('agendamento.update');
-        Route::view('/Hem_Alertas.blade.php', 'hemocentro.Hem_Alertas')->name('alertas');
+        Route::get('/Hem_Alertas.blade.php', [HemocentroAlertaController::class, 'index'])->name('alertas');
+        Route::get('/eventos/campanha/{evento}/imagem', [HemocentroAlertaController::class, 'imagem'])->whereNumber('evento')->name('eventos.imagem');
+        Route::prefix('eventos/{categoria}')->where(['categoria' => 'alerta|campanha'])->name('eventos.')->controller(HemocentroAlertaController::class)->group(function (): void {
+            Route::post('/', 'store')->name('store');
+            Route::put('/{evento}', 'update')->whereNumber('evento')->name('update');
+            Route::patch('/{evento}/status', 'status')->whereNumber('evento')->name('status');
+            Route::delete('/{evento}', 'destroy')->whereNumber('evento')->name('destroy');
+        });
         Route::get('/Hem_Atendimento.blade.php', [HemocentroAtendimentoController::class, 'index'])->name('atendimento');
         Route::post('/atendimento/{protocolo}/confirmar-chegada', [HemocentroAtendimentoController::class, 'confirmarChegada'])
             ->whereNumber('protocolo')->name('atendimento.chegada');

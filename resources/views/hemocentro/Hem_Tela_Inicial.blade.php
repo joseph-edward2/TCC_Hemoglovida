@@ -118,7 +118,7 @@
           <div @class(['alert-item', 'is-active' => $isUpcoming])>
             <div class="alert-icon"><i class="ph ph-calendar"></i></div>
             <div class="alert-body">
-              <div class="alert-title">{{ $event->tipo_evento }}</div>
+              <div class="alert-title">{{ $event->titulo_evento ?? $event->tipo_evento }}</div>
               <div class="alert-meta">
                 <time datetime="{{ $startsAt->toIso8601String() }}">{{ $startsAt->format('d/m/Y H:i') }}</time>
                 &bull; {{ $event->local_evento }}

@@ -17,6 +17,7 @@ class HemocentroDashboardController extends Controller
         $cnes = $request->user()->cnes_hem;
         $consultedAt = now('America/Sao_Paulo')->toImmutable();
         $today = $consultedAt->startOfDay();
+        $publishedEvents = DB::table('evento')->where('cnes_hem', $cnes)->where('status_evento', 'publicado');
         $stockByType = DB::table('bolsa_sangue')
             ->where('cnes_hem', $cnes)
             ->selectRaw('UPPER(TRIM(tipo_bolsa)) AS blood_type, SUM(quant_bolsa) AS total')
@@ -33,20 +34,18 @@ class HemocentroDashboardController extends Controller
                 ->where('data_hora_agendamento', '>=', $today->utc())
                 ->where('data_hora_agendamento', '<', $today->addDay()->utc())
                 ->count(),
-            'upcomingEvents' => DB::table('evento')
-                ->where('cnes_hem', $cnes)
+            'upcomingEvents' => (clone $publishedEvents)
                 ->where('data_hora_evento', '>=', $consultedAt->utc())
                 ->count(),
             'pendingRequests' => DB::table('pedido')
                 ->where('cnes_hem', $cnes)
                 ->where('status_ped', 'pendente')
                 ->count(),
-            'events' => DB::table('evento')
-                ->where('cnes_hem', $cnes)
+            'events' => $publishedEvents
                 ->orderByDesc('data_hora_evento')
                 ->orderByDesc('id_evento')
                 ->limit(4)
-                ->get(['tipo_evento', 'data_hora_evento', 'local_evento', 'desc_evento']),
+                ->get(['titulo_evento', 'tipo_evento', 'data_hora_evento', 'local_evento', 'desc_evento']),
             'recentRequests' => DB::table('pedido')
                 ->join('hospital', 'hospital.cnpj_hosp', '=', 'pedido.cnpj_hosp')
                 ->where('pedido.cnes_hem', $cnes)
