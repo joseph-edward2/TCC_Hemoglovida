@@ -20,19 +20,23 @@
     </div>
 
     <nav>
-      <a href="{{ route('hemocentro.inicio') }}">Visão Geral</a>
-      <a href="{{ route('hemocentro.atendimento') }}">Atendimento</a>
-      <a href="{{ route('hemocentro.estoque') }}">Estoque</a>
-      <a href="{{ route('hemocentro.agendamento') }}">Agendamentos</a>
-      <a href="{{ route('hemocentro.pedidos') }}" class="active" aria-current="page">Pedidos</a>
-      <a href="{{ route('hemocentro.alertas') }}">Alertas</a>
+      <a href="Hem_Tela_Inicial.blade.php">Visão Geral</a>
+      <a href="Hem_Atendimento.blade.php">Atendimento</a>
+      <a href="Hem_Estoque.blade.php">Estoque</a>
+      <a href="Hem_Agendamento.blade.php">Agendamentos</a>
+      <a href="Hem_Pedidos.blade.php" class="active">Pedidos</a>
+      <a href="Hem_Alertas.blade.php">Alertas</a>
     </nav>
   </div>
 
-  <div class="user">
-    <span>Bem-vindo, {{ auth()->user()->nome_fun ?? 'Hemocentro '.auth()->user()->cnes_hem }}</span>
-    <a href="{{ route('hemocentro.usuario') }}" class="avatar" aria-label="Minha conta"><i class="ph ph-user"></i></a>
-  </div>
+    <div class="user">
+     <span>Bem-vindo, Dr. Walter White</span>
+      <a href="Hem_Usuario.blade.php">
+      <div class="avatar">
+        <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
+      </div>
+      </a>
+    </div>
 </header>
 
 <main class="dashboard">

@@ -29,7 +29,7 @@
   </div>
 
     <div class="user">
-      <span>Bem-vindo{{ isset(auth()->user()->nome_fun) ? ', '.auth()->user()->nome_fun : '' }}</span>
+     <span>Bem-vindo, Dr. Walter White</span>
       <a href="Hem_Usuario.blade.php">
       <div class="avatar">
         <img src="{{ asset('assets/WalterWhite.png') }}" alt="Foto do usuário">
