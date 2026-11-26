@@ -20,4 +20,18 @@ enum StatusPedido: string
             self::Entregue => 'Entregue',
         };
     }
+
+    /**
+     * Etapa correspondente na timeline fixa de cinco posições.
+     */
+    public function etapa(): int
+    {
+        return match ($this) {
+            self::Pendente => 1,
+            self::EmAnalise => 2,
+            self::EmSeparacao => 3,
+            self::Enviado => 4,
+            self::Entregue => 5,
+        };
+    }
 }

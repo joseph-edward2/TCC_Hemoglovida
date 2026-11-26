@@ -7,9 +7,11 @@ use App\Enums\TipoSanguineo;
 use Database\Factories\BolsaSangueFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use InvalidArgumentException;
 
 class BolsaSangue extends Model
 {
@@ -37,6 +39,7 @@ class BolsaSangue extends Model
         'id_ped',
         'data_hora_envio_bolsa',
         'data_hora_recebimento_bolsa',
+        'data_hora_saida_bolsa',
         'paciente_destino_bolsa',
     ];
 
@@ -53,7 +56,14 @@ class BolsaSangue extends Model
             'disponibilidade_bolsa' => StatusBolsa::class,
             'data_hora_envio_bolsa' => 'datetime',
             'data_hora_recebimento_bolsa' => 'datetime',
+            'data_hora_saida_bolsa' => 'datetime',
         ];
+    }
+
+    protected function vencida(): Attribute
+    {
+        return Attribute::get(fn (): bool => $this->data_venc_bolsa !== null
+            && $this->data_venc_bolsa->lt(today()));
     }
 
     public function hemocentro(): BelongsTo
@@ -69,6 +79,36 @@ class BolsaSangue extends Model
     public function pedido(): BelongsTo
     {
         return $this->belongsTo(Pedido::class, 'id_ped', 'id_ped');
+    }
+
+    /**
+     * Aplica a única regra de transição de status da bolsa, incluindo os
+     * carimbos de recebimento e saída. Usada pelo estoque e pela confirmação
+     * de chegada dos pedidos.
+     */
+    public function aplicarTransicao(StatusBolsa $destino, ?string $pacienteDestino = null): void
+    {
+        $origem = $this->disponibilidade_bolsa;
+
+        if (! $origem->podeTransicionarPara($destino, (bool) $this->vencida)) {
+            throw new InvalidArgumentException(
+                $origem->mensagemTransicaoInvalida($destino, (bool) $this->vencida),
+            );
+        }
+
+        $this->disponibilidade_bolsa = $destino;
+
+        if ($origem === StatusBolsa::EmTransito && $destino === StatusBolsa::Disponivel) {
+            $this->data_hora_recebimento_bolsa = now();
+        }
+
+        if (in_array($destino, [StatusBolsa::Utilizada, StatusBolsa::Descartada], true)) {
+            $this->data_hora_saida_bolsa = now();
+        }
+
+        if ($pacienteDestino !== null) {
+            $this->paciente_destino_bolsa = $pacienteDestino;
+        }
     }
 
     #[Scope]
@@ -95,8 +135,8 @@ class BolsaSangue extends Model
         $dias ??= (int) config('estoque.dias_a_vencer', 7);
 
         return $query->whereBetween('data_venc_bolsa', [
-            today()->toDateString(),
-            today()->addDays($dias)->toDateString(),
+            today()->startOfDay()->toDateTimeString(),
+            today()->addDays($dias)->endOfDay()->toDateTimeString(),
         ]);
     }
 

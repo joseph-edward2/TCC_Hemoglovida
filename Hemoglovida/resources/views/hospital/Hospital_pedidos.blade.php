@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Pedidos — Hospital | Hemoglovida</title>
-
 
   <link rel="stylesheet" href="{{ asset('css/hospital/base.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hospital/pedidos.css') }}">
@@ -12,92 +12,44 @@
 </head>
 <body>
 
-  <!-- ======================================================
-       HEADER (classes vindas do base.css)
-       ====================================================== -->
   <header>
-    <!--Título e logo-->
     <div class="header-left">
       <div class="logo">
         <img src="https://i.ibb.co/SwCGm0fj/Hemoglovida-Logo.png" alt="Logo Hemoglovida" class="logo-icon">
         Hemoglovida
       </div>
 
-      <!--Links da navbar-->
       <nav>
         <a href="{{ route('hospital.estoque') }}">Estoque</a>
         <a href="{{ route('hospital.pedidos') }}" class="active">Pedidos</a>
       </nav>
     </div>
 
-    <!--Ícone de usuário-->
     <div class="user">
       Bem-vindo, {{ $nomeExibido() }}
       <a href="{{ route('hospital.usuario') }}">
-      <div class="avatar">
-        <img src="{{ $fotoPerfil() }}" alt="Foto de perfil">
-      </div>
+        <div class="avatar">
+          <img src="{{ $fotoPerfil() }}" alt="Foto de perfil">
+        </div>
       </a>
     </div>
   </header>
 
-
   <main class="page-content">
-
-    <!-- ====================================================
-         TÍTULO DA PÁGINA
-         ==================================================== -->
     <div class="page-top">
       <h1>Requisições de Sangue</h1>
-      <button class="btn" id="btnNovaRequisicao">+ Nova Requisição</button>
+      <button class="btn" id="btnNovaRequisicao" type="button">+ Nova Requisição</button>
     </div>
 
-    <!-- ====================================================
-         FAIXA DE RESUMO
-         ==================================================== -->
-    <div class="summary-grid">
-      <div class="summary-card">
-        <div>
-          <div class="summary-card__label">Requisições Pendentes</div>
-          <div class="summary-card__value">12</div>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div>
-          <div class="summary-card__label">Em Separação</div>
-          <div class="summary-card__value">05</div>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div>
-          <div class="summary-card__label">Recebidos Hoje</div>
-          <div class="summary-card__value">08</div>
-        </div>
-      </div>
-      <div class="summary-card summary-card--critical">
-        <div>
-          <div class="summary-card__label">Pedidos Críticos</div>
-          <div class="summary-card__value">03</div>
-        </div>
-      </div>
-    </div>
+    <div class="summary-grid" id="resumoPedidos" data-url="{{ route('hospital.pedidos.resumo') }}"></div>
 
-    <!-- ====================================================
-         LAYOUT EM DUAS COLUNAS: formulário + tabela
-         ==================================================== -->
     <div class="pedidos-layout">
-
-      <!-- ---------- COLUNA ESQUERDA: FORMULÁRIO ---------- -->
       <div class="request-card" id="formNovaRequisicao">
         <h2 class="request-card__title">Solicitar Bolsas</h2>
 
-        <form id="formRequisicao">
-
-          <!-- Tipo sanguíneo -->
+        <form id="formRequisicao" data-url="{{ route('hospital.pedidos.store') }}">
           <div class="form-section">
             <label class="form-section__label">Tipo Sanguíneo Requerido</label>
-            <!-- Os botões abaixo funcionam tipo um "rádio": só um fica
-                 ativo por vez (comportamento controlado via JS) -->
             <div class="blood-select" id="tipoSanguineo">
               <button type="button" class="blood-select__btn">O-</button>
               <button type="button" class="blood-select__btn">O+</button>
@@ -108,60 +60,42 @@
               <button type="button" class="blood-select__btn">AB-</button>
               <button type="button" class="blood-select__btn">AB+</button>
             </div>
-            <!-- Guarda o tipo escolhido pra enviar junto no formulário -->
             <input type="hidden" name="tipo_sanguineo" id="tipoSanguineoValor">
           </div>
 
           <div class="form-row">
-            <!-- Quantidade de bolsas -->
             <div class="form-section">
               <label class="form-section__label">Quantidade de bolsas</label>
               <div class="qty-stepper">
                 <button type="button" class="qty-stepper__btn" id="qtyMenos">−</button>
-                <input type="number" class="qty-stepper__input" id="qtyInput" name="quantidade" value="2" min="1">
+                <input type="number" class="qty-stepper__input" id="qtyInput" name="quantidade" value="2" min="1" max="50">
                 <button type="button" class="qty-stepper__btn" id="qtyMais">+</button>
               </div>
             </div>
 
-            <!-- Urgência -->
             <div class="form-section">
               <label class="form-section__label">Urgência</label>
               <select class="field__select" name="urgencia">
                 <option value="rotina">Rotina</option>
-                <option value="urgente">Urgente</option>
-                <option value="critica" selected>Crítica</option>
+                <option value="urgente" selected>Urgente</option>
+                <option value="critica">Crítica</option>
               </select>
             </div>
           </div>
 
-          <!-- Paciente / Setor -->
           <div class="form-section">
             <label class="form-section__label">Paciente / Setor</label>
-            <input type="text" class="field__input" name="paciente_setor" placeholder="Ex: João Silva - UTI Cardiovascular">
+            <input type="text" class="field__input" name="paciente_setor" placeholder="Ex: João Silva - UTI">
           </div>
 
-          <!-- Hemocentro de destino -->
           <div class="form-section">
             <label class="form-section__label">Hemocentro de Destino</label>
-
-            <label class="hemo-option">
-              <input type="radio" name="hemocentro" value="central" class="hemo-option__radio" checked>
-              <div>
-                <div class="hemo-option__name">Hemocentro Central (2km)</div>
-                <div class="hemo-option__status hemo-option__status--disponivel">Estoque Disponível</div>
-              </div>
-            </label>
-
-            <label class="hemo-option">
-              <input type="radio" name="hemocentro" value="leste" class="hemo-option__radio">
-              <div>
-                <div class="hemo-option__name">Hemocentro Leste (5km)</div>
-                <div class="hemo-option__status hemo-option__status--baixo">Estoque Baixo</div>
-              </div>
-            </label>
+            <div class="hemocentro-busca" id="hemocentroBusca">
+              <input type="search" class="field__input busca-hemocentro" id="buscaHemocentro" placeholder="Buscar por nome, CNES ou contato" aria-label="Buscar hemocentro de destino" aria-controls="listaHemocentros" aria-expanded="false" autocomplete="off" role="combobox">
+              <div class="lista-hemocentros" id="listaHemocentros" data-url="{{ route('hospital.pedidos.hemocentros') }}" role="listbox" hidden></div>
+            </div>
           </div>
 
-          <!-- Documento assinado -->
           <div class="form-section">
             <label class="form-section__label">Documento de Requisição (Assinado)</label>
             <div class="upload-box">
@@ -171,25 +105,24 @@
                 <div class="upload-box__meta" id="metaArquivo">Envie o PDF assinado da requisição</div>
               </div>
               <button type="button" class="btn-outline-sm" id="btnTrocarArquivo">Escolher arquivo</button>
-              <input type="file" id="inputArquivo" accept=".pdf" hidden>
+              <input type="file" name="requisicao" id="inputArquivo" accept=".pdf,application/pdf" hidden>
             </div>
           </div>
 
-          <button type="submit" class="btn">Enviar Requisição</button>
+          <button type="submit" class="btn" id="btnEnviarRequisicao">Enviar Requisição</button>
         </form>
 
         <p class="msg" id="msg" hidden></p>
       </div>
 
-      <!-- ---------- COLUNA DIREITA: TABELA + BANNER ---------- -->
       <div>
         <div class="monitor-card">
           <div class="monitor-card__head">
-            <h2>Monitoramento em Tempo Real</h2>
-            <span class="status-online">
-              <span class="status-online__dot"></span>
-              Sistema Online
-            </span>
+            <h2>Monitoramento dos Pedidos</h2>
+            <div class="monitor-card__actions">
+              <span class="atualizado-em" id="atualizadoEm">—</span>
+              <button type="button" class="btn-outline-sm" id="btnAtualizar">Atualizar</button>
+            </div>
           </div>
 
           <div class="table-scroll">
@@ -199,73 +132,21 @@
                   <th>Tipo</th>
                   <th>Qtd</th>
                   <th>Urgência</th>
-                  <th>Status / Timeline</th>
+                  <th>Status / Etapas</th>
                   <th>Doc</th>
                 </tr>
               </thead>
-              <tbody>
-                <!-- Linha crítica: estágio atual = "Em Separação" (3ª etapa de 5) -->
-                <tr>
-                  <td><span class="blood-tag">O-</span></td>
-                  <td>04 unid.</td>
-                  <td><span class="urgencia-tag urgencia-tag--critica">CRÍTICA</span></td>
-                  <td>
-                    <div class="timeline">
-                      <span class="timeline__dot timeline__dot--done"></span>
-                      <span class="timeline__line timeline__line--done"></span>
-                      <span class="timeline__dot timeline__dot--current"></span>
-                      <span class="timeline__line"></span>
-                      <span class="timeline__dot"></span>
-                      <span class="timeline__line"></span>
-                      <span class="timeline__dot"></span>
-                    </div>
-                    <span class="timeline__label">Em Separação</span>
-                  </td>
-                  <td><button class="btn-outline-sm">Ver PDF</button></td>
-                </tr>
-
-                <!-- Linha normal: já concluída ("Entregue") -->
-                <tr>
-                  <td><span class="blood-tag">A+</span></td>
-                  <td>02 unid.</td>
-                  <td><span class="urgencia-tag urgencia-tag--rotina">ROTINA</span></td>
-                  <td>
-                    <div class="timeline">
-                      <span class="timeline__dot timeline__dot--done"></span>
-                      <span class="timeline__line timeline__line--done"></span>
-                      <span class="timeline__dot timeline__dot--done"></span>
-                      <span class="timeline__line timeline__line--done"></span>
-                      <span class="timeline__dot timeline__dot--done"></span>
-                    </div>
-                    <span class="timeline__label">Entregue</span>
-                  </td>
-                  <td><button class="btn-outline-sm">Ver PDF</button></td>
-                </tr>
-
-                <!-- Linha urgente: estágio atual = "Enviado" (2ª etapa) -->
-                <tr>
-                  <td><span class="blood-tag">B-</span></td>
-                  <td>01 unid.</td>
-                  <td><span class="urgencia-tag urgencia-tag--urgente">URGENTE</span></td>
-                  <td>
-                    <div class="timeline">
-                      <span class="timeline__dot timeline__dot--done"></span>
-                      <span class="timeline__line timeline__line--done"></span>
-                      <span class="timeline__dot timeline__dot--current"></span>
-                      <span class="timeline__line"></span>
-                      <span class="timeline__dot"></span>
-                    </div>
-                    <span class="timeline__label">Enviado</span>
-                  </td>
-                  <td><button class="btn-outline-sm">Ver PDF</button></td>
-                </tr>
-              </tbody>
+              <tbody id="listaPedidos"
+                data-url="{{ route('hospital.pedidos.listar') }}"
+                data-bolsas-url="{{ route('hospital.pedidos.bolsas-em-transito', ['pedido' => '__ID__']) }}"
+                data-confirmar-url="{{ route('hospital.pedidos.confirmar-chegada', ['pedido' => '__ID__']) }}"></tbody>
             </table>
           </div>
+
+          <div class="paginacao" id="paginacaoMonitor"></div>
+          <p class="msg" id="msgMonitor" hidden></p>
         </div>
 
-        <!-- Banner informativo (o conteúdo original desse bloco não veio
-             completo do Figma — ajuste o texto como preferir) -->
         <div class="info-banner">
           <div class="info-banner__icon">i</div>
           <div class="info-banner__text">
@@ -273,18 +154,36 @@
             <p>
               Cada pedido passa por até 5 etapas:
               @foreach (\App\Enums\StatusPedido::cases() as $status)
-                {{ $status->label() }}{{ $loop->last ? '.' : ',' }}
+                {{ $status->label() }}{{ $loop->last ? '.' : ' | ' }}
               @endforeach
-              Acompanhe o status de cada pedido em tempo real na tabela acima.
+              Acompanhe o andamento na tabela acima.
             </p>
           </div>
         </div>
       </div>
-
     </div>
-
   </main>
 
+  <div class="overlay" id="overlayChegada" hidden>
+    <div class="modal modal--chegada" role="dialog" aria-modal="true" aria-labelledby="tituloChegada">
+      <div class="modal__header">
+        <h2 id="tituloChegada">Confirmar chegada das bolsas</h2>
+        <button type="button" class="modal__close" id="btnFecharChegada" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__body">
+        <p class="modal__hint" id="resumoChegada"></p>
+        <ul class="modal__bolsas" id="listaBolsasChegada"></ul>
+        <label class="modal__confirmacao">
+          <input type="checkbox" id="conferiBolsas">
+          Conferi as bolsas recebidas
+        </label>
+        <p class="msg" id="msgChegada" hidden></p>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn" id="btnConfirmarRecebimento" disabled>Confirmar recebimento</button>
+      </div>
+    </div>
+  </div>
 
   <script src="{{ asset('js/hospital/base.js') }}"></script>
   <script src="{{ asset('js/hospital/pedidos.js') }}"></script>

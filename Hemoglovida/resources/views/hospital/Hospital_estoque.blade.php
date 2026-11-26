@@ -3,257 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Estoque — Hospital | Hemoglovida</title>
 
-  <!-- Lembrete: confira a profundidade das pastas antes de
-       colar isso no seu projeto (quantos "../" precisa) -->
   <link rel="stylesheet" href="{{ asset('css/hospital/base.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hospital/estoque.css') }}">
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 </head>
 <body>
 
-  <!-- ======================================================
-       HEADER (classes vindas do base.css)
-       ====================================================== -->
   <header>
-    <!--Título e logo-->
     <div class="header-left">
       <div class="logo">
-         <img src="https://i.ibb.co/SwCGm0fj/Hemoglovida-Logo.png" alt="Logo Hemoglovida" class="logo-icon">
+        <img src="https://i.ibb.co/SwCGm0fj/Hemoglovida-Logo.png" alt="Logo Hemoglovida" class="logo-icon">
         Hemoglovida
       </div>
 
-      <!--Links da navbar-->
       <nav>
         <a href="{{ route('hospital.estoque') }}" class="active">Estoque</a>
         <a href="{{ route('hospital.pedidos') }}">Pedidos</a>
       </nav>
     </div>
 
-    <!--Ícone de usuário-->
     <div class="user">
       Bem-vindo, {{ $nomeExibido() }}
       <a href="{{ route('hospital.usuario') }}">
-      <div class="avatar">
-        <img src="{{ $fotoPerfil() }}" alt="Foto de perfil">
-      </div>
+        <div class="avatar">
+          <img src="{{ $fotoPerfil() }}" alt="Foto de perfil">
+        </div>
       </a>
     </div>
   </header>
 
-
   <main class="page-content">
 
-    <!-- ====================================================
-         TÍTULO DA PÁGINA
-         ==================================================== -->
     <div class="page-top">
-      <h1>Estoque do Hospital — Santa Casa SP</h1>
+      <h1 id="estoqueTitulo">Estoque do Hospital — {{ $hospitalSessao()?->nome_hosp ?? 'Hospital' }}</h1>
       <div class="updated-tag">
         <span class="updated-dot"></span>
-        Atualizado agora
+        <span id="estoqueAtualizado">Carregando dados...</span>
       </div>
     </div>
 
-    <!-- ====================================================
-         BANNER DE ALERTA
-         ==================================================== -->
-    <div class="alert-banner">
+    <div class="alert-banner" id="estoqueAlerta" hidden>
       <div class="alert-banner__content">
         <div class="alert-banner__icon">!</div>
         <div class="alert-banner__text">
           <h2>Estoque Crítico Detectado</h2>
-          <p>2 tipos sanguíneos estão abaixo do estoque mínimo de segurança.</p>
+          <p id="estoqueAlertaTexto"></p>
         </div>
       </div>
-      <button class="btn" id="btnRequisicao">Fazer Requisição Agora</button>
+      <a class="btn" id="btnRequisicao" data-url="{{ route('hospital.pedidos') }}" href="{{ route('hospital.pedidos') }}">Fazer Requisição Agora</a>
     </div>
 
-    <!-- ====================================================
-         CARTÕES POR TIPO SANGUÍNEO
-         Cada .stock-card representa um tipo. A classe extra
-         "stock-card--critical" só entra quando o estoque
-         está abaixo do mínimo (aí também aparece o badge).
-         ==================================================== -->
-    <div class="stock-grid">
+    <div class="estoque-mensagem" id="estoqueMensagem" role="status" hidden></div>
 
-      <!-- O- (crítico) -->
-      <div class="stock-card stock-card--critical">
-        <div class="stock-card__head">
-          <span class="stock-card__type">O-</span>
-          <span class="stock-card__badge">CRÍTICO</span>
-        </div>
-        <div class="stock-card__count">
-          <strong>12</strong>
-          <span>bolsas</span>
-        </div>
-        <div class="stock-card__bar">
-          <div class="stock-card__bar-fill" style="width: 15%;"></div>
-        </div>
-        <div class="stock-card__meta">
-          <span>Meta: 80 bolsas</span>
-          <span>15% do ideal</span>
-        </div>
-        <div class="stock-card__expiry stock-card__expiry--warning">
-          5 bolsas vencendo em 7 dias
-        </div>
-      </div>
+    <div class="stock-grid" id="estoqueCards" data-url="{{ route('hospital.estoque.resumo') }}"></div>
 
-      <!-- O+ -->
-      <div class="stock-card">
-        <div class="stock-card__head">
-          <span class="stock-card__type">O+</span>
-        </div>
-        <div class="stock-card__count">
-          <strong>64</strong>
-          <span>bolsas</span>
-        </div>
-        <div class="stock-card__bar">
-          <div class="stock-card__bar-fill" style="width: 64%;"></div>
-        </div>
-        <div class="stock-card__meta">
-          <span>Meta: 100 bolsas</span>
-          <span>64% do ideal</span>
-        </div>
-        <div class="stock-card__expiry">
-          Nenhuma expiração próxima
-        </div>
-      </div>
-
-      <!-- A- -->
-      <div class="stock-card">
-        <div class="stock-card__head">
-          <span class="stock-card__type">A-</span>
-        </div>
-        <div class="stock-card__count">
-          <strong>42</strong>
-          <span>bolsas</span>
-        </div>
-        <div class="stock-card__bar">
-          <div class="stock-card__bar-fill" style="width: 42%;"></div>
-        </div>
-        <div class="stock-card__meta">
-          <span>Meta: 100 bolsas</span>
-          <span>42% do ideal</span>
-        </div>
-        <div class="stock-card__expiry stock-card__expiry--warning">
-          2 bolsas vencendo em 7 dias
-        </div>
-      </div>
-
-      <!-- A+ -->
-      <div class="stock-card">
-        <div class="stock-card__head">
-          <span class="stock-card__type">A+</span>
-        </div>
-        <div class="stock-card__count">
-          <strong>88</strong>
-          <span>bolsas</span>
-        </div>
-        <div class="stock-card__bar">
-          <div class="stock-card__bar-fill" style="width: 88%;"></div>
-        </div>
-        <div class="stock-card__meta">
-          <span>Meta: 100 bolsas</span>
-          <span>88% do ideal</span>
-        </div>
-        <div class="stock-card__expiry">
-          Nenhuma expiração próxima
-        </div>
-      </div>
-
-      <!-- B- -->
-      <div class="stock-card">
-        <div class="stock-card__head">
-          <span class="stock-card__type">B-</span>
-        </div>
-        <div class="stock-card__count">
-          <strong>24</strong>
-          <span>bolsas</span>
-        </div>
-        <div class="stock-card__bar">
-          <div class="stock-card__bar-fill" style="width: 48%;"></div>
-        </div>
-        <div class="stock-card__meta">
-          <span>Meta: 50 bolsas</span>
-          <span>48% do ideal</span>
-        </div>
-        <div class="stock-card__expiry">
-          Nenhuma expiração próxima
-        </div>
-      </div>
-
-      <!-- B+ (crítico) -->
-      <div class="stock-card stock-card--critical">
-        <div class="stock-card__head">
-          <span class="stock-card__type">B+</span>
-          <span class="stock-card__badge">CRÍTICO</span>
-        </div>
-        <div class="stock-card__count">
-          <strong>9</strong>
-          <span>bolsas</span>
-        </div>
-        <div class="stock-card__bar">
-          <div class="stock-card__bar-fill" style="width: 12%;"></div>
-        </div>
-        <div class="stock-card__meta">
-          <span>Meta: 75 bolsas</span>
-          <span>12% do ideal</span>
-        </div>
-        <div class="stock-card__expiry stock-card__expiry--warning">
-          8 bolsas vencendo em 7 dias
-        </div>
-      </div>
-
-      <!-- AB- (crítico) -->
-      <div class="stock-card stock-card--critical">
-        <div class="stock-card__head">
-          <span class="stock-card__type">AB-</span>
-          <span class="stock-card__badge">CRÍTICO</span>
-        </div>
-        <div class="stock-card__count">
-          <strong>4</strong>
-          <span>bolsas</span>
-        </div>
-        <div class="stock-card__bar">
-          <div class="stock-card__bar-fill" style="width: 13%;"></div>
-        </div>
-        <div class="stock-card__meta">
-          <span>Meta: 30 bolsas</span>
-          <span>13% do ideal</span>
-        </div>
-        <div class="stock-card__expiry">
-          Nenhuma expiração próxima
-        </div>
-      </div>
-
-      <!-- AB+ -->
-      <div class="stock-card">
-        <div class="stock-card__head">
-          <span class="stock-card__type">AB+</span>
-        </div>
-        <div class="stock-card__count">
-          <strong>31</strong>
-          <span>bolsas</span>
-        </div>
-        <div class="stock-card__bar">
-          <div class="stock-card__bar-fill" style="width: 77%;"></div>
-        </div>
-        <div class="stock-card__meta">
-          <span>Meta: 40 bolsas</span>
-          <span>77% do ideal</span>
-        </div>
-        <div class="stock-card__expiry">
-          Nenhuma expiração próxima
-        </div>
-      </div>
-
-    </div><!-- /.stock-grid -->
-
-    <!-- ====================================================
-         GRÁFICO DE CONSUMO (mock estático, sem JS)
-         ==================================================== -->
     <div class="chart-card">
       <div class="chart-card__head">
         <h2>Consumo de Estoque</h2>
@@ -266,219 +72,110 @@
             <span class="chart-legend__dot chart-legend__dot--entradas"></span>
             Entradas
           </span>
-          <span class="chart-period">Últimos 30 dias</span>
+          <span class="chart-period" id="estoquePeriodo">Últimos 28 dias</span>
         </div>
       </div>
 
-      <!-- As alturas abaixo são fixas só pra representar o
-           visual do gráfico. Em um projeto real, essas
-           alturas viriam do banco de dados via JS/PHP. -->
-      <div class="chart-scale" aria-hidden="true"><span>80</span><span>60</span><span>40</span><span>20</span><span>0</span></div>
-      <div class="bar-chart" aria-label="Consumo semanal: semana 1, 40 saídas e 54 entradas; semana 2, 63 saídas e 50 entradas; semana 3, 27 saídas e 77 entradas; semana 4, 59 saídas e 65 entradas.">
-        <div class="bar-chart__week">
-          <div class="bar-chart__bars">
-            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 80px;"><span>40</span></div>
-            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 108px;"><span>54</span></div>
-          </div>
-          <span class="bar-chart__label">SEMANA 1</span>
+      <div class="chart-scale" id="estoqueEscala" aria-hidden="true"></div>
+      <div class="bar-chart" id="estoqueGrafico" data-url="{{ route('hospital.estoque.consumo') }}" aria-label="Consumo semanal"></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card__head">
+        <h2>Inventário Detalhado</h2>
+        <div class="table-card__actions">
+          <button class="btn-outline-sm" id="btnImprimir" type="button">Imprimir</button>
+          <button class="btn-outline-sm" data-abrir-inventario type="button">Editar Inventário</button>
         </div>
-        <div class="bar-chart__week">
-          <div class="bar-chart__bars">
-            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 126px;"><span>63</span></div>
-            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 99px;"><span>50</span></div>
-          </div>
-          <span class="bar-chart__label">SEMANA 2</span>
-        </div>
-        <div class="bar-chart__week">
-          <div class="bar-chart__bars">
-            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 54px;"><span>27</span></div>
-            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 153px;"><span>77</span></div>
-          </div>
-          <span class="bar-chart__label">SEMANA 3</span>
-        </div>
-        <div class="bar-chart__week">
-          <div class="bar-chart__bars">
-            <div class="bar-chart__bar bar-chart__bar--saidas" style="height: 117px;"><span>59</span></div>
-            <div class="bar-chart__bar bar-chart__bar--entradas" style="height: 130px;"><span>65</span></div>
-          </div>
-          <span class="bar-chart__label">SEMANA 4</span>
-        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th>ID Bolsa/Lote</th>
+              <th>Tipo Sanguíneo</th>
+              <th>Origem</th>
+              <th>Recebimento</th>
+              <th>Validade</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="estoqueTabela" data-url="{{ route('hospital.estoque.bolsas') }}"></tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span class="table-footer__info" id="estoqueInfo">Carregando bolsas...</span>
+        <div class="paginacao" id="estoquePaginacao"></div>
       </div>
     </div>
 
-    <!-- ====================================================
-         TABELA DE INVENTÁRIO DETALHADO
-         ==================================================== -->
-     <div class="table-card">
-    <div class="table-card__head">
-      <h2>Inventário Detalhado</h2>
-      <div class="table-card__actions">
-        <button class="btn-outline-sm">Imprimir</button>
-        <!-- Botão novo desta tela: abre o modal na 1ª bolsa -->
-        <button class="btn-outline-sm" data-abrir-inventario>Editar Inventário</button>
-      </div>
-    </div>
+  </main>
 
-    <div class="table-scroll">
-      <table class="inventory-table">
-        <thead>
-          <tr>
-            <th>ID Bolsa/Lote</th>
-            <th>Tipo Sanguíneo</th>
-            <th>Origem</th>
-            <th>Recebimento</th>
-            <th>Validade</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#H-1234</td>
-            <td><span class="blood-tag">O-</span></td>
-            <td>Hemocentro Central</td>
-            <td>12/10/2023</td>
-            <td>19/10/2023</td>
-            <td><span class="status-tag status-tag--disponivel">Disponível</span></td>
-            <td><button class="table-action-btn" data-abrir-inventario data-bolsa="H-1234">Ver</button></td>
-          </tr>
-          <tr>
-            <td>#H-1235</td>
-            <td><span class="blood-tag">A+</span></td>
-            <td>Hemocentro Leste</td>
-            <td>14/10/2023</td>
-            <td>14/11/2023</td>
-            <td><span class="status-tag status-tag--reservado">Reservado</span></td>
-            <td><button class="table-action-btn" data-abrir-inventario data-bolsa="H-1235">Ver</button></td>
-          </tr>
-          <tr>
-            <td>#H-1236</td>
-            <td><span class="blood-tag">O-</span></td>
-            <td>Hemocentro Central</td>
-            <td>15/10/2023</td>
-            <td>22/10/2023</td>
-            <td><span class="status-tag status-tag--utilizado">Utilizado</span></td>
-            <td><button class="table-action-btn" data-abrir-inventario data-bolsa="H-1236">Ver</button></td>
-          </tr>
-          <tr>
-            <!-- #H-1237 não tem mock ainda (veja o TODO no
-                 estoque-modal.js) — por isso, sem botão "Ver" por enquanto -->
-            <td>#H-1237</td>
-            <td><span class="blood-tag">B-</span></td>
-            <td>Hospital Santa Casa</td>
-            <td>10/10/2023</td>
-            <td>15/10/2023</td>
-            <td><span class="status-tag status-tag--utilizado">Utilizado</span></td>
-            <td><button class="table-action-btn" data-abrir-inventario data-bolsa="H-1237">Ver</button></td>
-          </tr>
-          <tr>
-            <td>#H-1238</td>
-            <td><span class="blood-tag">B-</span></td>
-            <td>Hospital Telavive</td>
-            <td>10/10/1000a.C</td>
-            <td>15/10/2023</td>
-            <td><span class="status-tag status-tag--utilizado">Utilizado</span></td>
-            <td><button class="table-action-btn" data-abrir-inventario data-bolsa="H-1238">Ver</button></td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="overlay" id="modalInventarioOverlay">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 id="modalTitulo">Inventário — {{ $hospitalSessao()?->nome_hosp ?? 'Hospital' }}</h2>
+        <button class="modal__close" id="modalInventarioClose" type="button" aria-label="Fechar">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <div class="modal__section">
+          <div class="modal__section-title">Controle Interno</div>
+          <div class="modal__grid">
+            <div class="modal__field">
+              <label class="modal__field-label" for="selectBolsa">ID Bolsa/Lote</label>
+              <select class="field__select" id="selectBolsa"></select>
+            </div>
+            <div class="modal__field">
+              <label class="modal__field-label" for="pacienteDestino">Paciente de destino</label>
+              <input class="field__input" type="text" id="pacienteDestino" placeholder="Ainda não definido" maxlength="150">
+            </div>
+            <div class="modal__field">
+              <label class="modal__field-label" for="statusBolsa">Status da Bolsa</label>
+              <select class="field__select" id="statusBolsa"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal__section">
+          <div class="modal__section-title">Informações da Bolsa</div>
+          <p class="modal__hint">
+            A validade das informações é de responsabilidade do hemocentro.
+            Qualquer inconformidade deve ser alertada a um administrador.
+          </p>
+          <div class="modal__grid">
+            <div class="modal__field">
+              <label class="modal__field-label" for="infoDataEnvio">Data de Envio</label>
+              <input class="field__input" type="text" id="infoDataEnvio" readonly>
+            </div>
+            <div class="modal__field">
+              <label class="modal__field-label" for="infoAboRh">ABO/Rh (Tipo Sanguíneo)</label>
+              <input class="field__input" type="text" id="infoAboRh" readonly>
+            </div>
+            <div class="modal__field">
+              <label class="modal__field-label" for="infoDataValidade">Data de Validade</label>
+              <input class="field__input" type="text" id="infoDataValidade" readonly>
+            </div>
+            <div class="modal__field">
+              <label class="modal__field-label" for="infoOrigem">Origem</label>
+              <input class="field__input" type="text" id="infoOrigem" readonly>
+            </div>
+            <div class="modal__field">
+              <label class="modal__field-label" for="infoIDDoacao">Número de identificação da doação (ISBT 128)</label>
+              <input class="field__input" type="text" id="infoIDDoacao" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn" id="btnConfirmarInventario" type="button">Confirmar</button>
+      </div>
     </div>
   </div>
-
-</div>
-
-
-
-<div class="overlay" id="modalInventarioOverlay">
-  <div class="modal">
-    <div class="modal__header">
-      <h2>Inventário — Santa Casa SP</h2>
-      <button class="modal__close" id="modalInventarioClose">✕</button>
-    </div>
-
-    <div class="modal__body">
-
-      <!-- ---- Seção 1: Controle Interno (editável pelo hospital) ---- -->
-      <div class="modal__section">
-        <div class="modal__section-title">Controle Interno</div>
-        <div class="modal__grid">
-          <div class="modal__field">
-            <label class="modal__field-label" for="selectBolsa">ID Bolsa/Lote</label>
-            <select class="field__select" id="selectBolsa">
-              <option value="H-1234">#H-1234</option>
-              <option value="H-1235">#H-1235</option>
-              <option value="H-1236">#H-1236</option>
-              <option value="H-1237">#H-1237</option>
-              <option value="H-1238">#H-1238</option>
-            </select>
-          </div>
-          <div class="modal__field">
-            <label class="modal__field-label" for="pacienteDestino">Paciente de destino</label>
-            <input class="field__input" type="text" id="pacienteDestino" placeholder="Ainda não definido">
-          </div>
-          <div class="modal__field">
-            <label class="modal__field-label" for="statusBolsa">Status da Bolsa</label>
-            <select class="field__select" id="statusBolsa">
-              <option>Disponível</option>
-              <option>Reservada</option>
-              <option>Utilizada</option>
-              <option>Descartada</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- ---- Seção 2: Informações da Bolsa (só leitura, vem do hemocentro) ---- -->
-      <div class="modal__section">
-        <div class="modal__section-title">Informações da Bolsa</div>
-        <p class="modal__hint">
-          A validade das informações é de responsabilidade do hemocentro.
-          Qualquer inconformidade deve ser alertada a um administrador.
-        </p>
-        <div class="modal__grid">
-          <div class="modal__field">
-            <label class="modal__field-label">Nome do Doador</label>
-            <input class="field__input" type="text" id="infoNomeDoador" readonly>
-          </div>
-          <div class="modal__field">
-            <label class="modal__field-label">Caderneta do Doador</label>
-            <input class="field__input" type="text" id="infoCaderneta" readonly>
-          </div>
-          <div class="modal__field">
-            <label class="modal__field-label">Data de Envio</label>
-            <input class="field__input" type="text" id="infoDataEnvio" readonly>
-          </div>
-          <div class="modal__field">
-            <label class="modal__field-label">ABO/Rh (Tipo Sanguíneo)</label>
-            <input class="field__input" type="text" id="infoAboRh" readonly>
-          </div>
-          <div class="modal__field">
-            <label class="modal__field-label">Data de Validade</label>
-            <input class="field__input" type="text" id="infoDataValidade" readonly>
-          </div>
-          <div class="modal__field">
-            <label class="modal__field-label">Origem</label>
-            <input class="field__input" type="text" id="infoOrigem" readonly>
-          </div>
-          <div class="modal__field">
-            <label class="modal__field-label">Data da Doação</label>
-            <input class="field__input" type="text" id="infoDataDoacao" readonly>
-          </div>
-           <div class="modal__field">
-            <label class="modal__field-label">Número de identificação da doação (ISBT 128)</label>
-            <input class="field__input" type="text" id="infoIDDoacao" readonly>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="modal__footer">
-      <button class="btn" id="btnConfirmarInventario">Confirmar</button>
-    </div>
-  </div>
-</div>
-
 
   <script src="{{ asset('js/hospital/base.js') }}"></script>
   <script src="{{ asset('js/hospital/estoque.js') }}"></script>

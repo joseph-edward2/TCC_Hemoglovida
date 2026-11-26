@@ -12,9 +12,10 @@ class HemocentroGuarulhosSeeder extends Seeder
      */
     public function run(): void
     {
-        $hemocentro = Hemocentro::firstOrCreate(
+        $hemocentro = Hemocentro::updateOrCreate(
             ['cnes_hem' => '2080338'],
             [
+                'nome_hem' => 'Hemocentro Guarulhos',
                 'cnpj_hem' => '46374500008926',
                 'endereco_hem' => 'Alameda dos Lírios, 300 - Parque Cecap, Guarulhos',
                 'contato_hem' => '(11) 3466-1350',

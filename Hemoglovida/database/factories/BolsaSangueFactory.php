@@ -32,6 +32,7 @@ class BolsaSangueFactory extends Factory
             'id_ped' => null,
             'data_hora_envio_bolsa' => null,
             'data_hora_recebimento_bolsa' => null,
+            'data_hora_saida_bolsa' => null,
             'paciente_destino_bolsa' => null,
         ];
     }

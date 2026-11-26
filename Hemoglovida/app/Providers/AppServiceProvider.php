@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\CargoFuncionario;
 use App\Models\Funcionario;
+use App\Models\Hospital;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
@@ -45,13 +46,19 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::share([
+            'hospitalSessao' => fn (): ?Hospital => Hospital::daSessao(),
             'podeCadastrarFuncionario' => fn (string $instituicao): bool => Gate::allows('cadastrar-funcionario', $instituicao),
-            'fotoPerfil' => fn (): string => asset(
-                Gate::allows('cadastrar-funcionario', 'hemocentro')
-                || Gate::allows('cadastrar-funcionario', 'hospital')
-                    ? 'assets/avatar_instituicao.jpg'
-                    : 'assets/avatar.jpg'
-            ),
+            'fotoPerfil' => function (): string {
+                if (Auth::guard('funcionario')->check()) {
+                    return asset('assets/avatar.jpg');
+                }
+
+                if (Auth::guard('hospital')->check() || Auth::guard('hemocentro')->check()) {
+                    return asset('assets/avatar_instituicao.jpg');
+                }
+
+                return asset('assets/avatar.jpg');
+            },
             'nomeExibido' => function (): string {
                 if (Auth::guard('funcionario')->check()) {
                     return Auth::guard('funcionario')->user()->nome_fun ?? '';

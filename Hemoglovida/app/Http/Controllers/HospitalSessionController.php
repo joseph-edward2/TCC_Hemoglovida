@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Funcionario;
 use App\Rules\Cpf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,6 +39,18 @@ class HospitalSessionController extends Controller
             }
 
             throw ValidationException::withMessages(['login' => 'CNPJ, CPF ou senha inválidos.']);
+        }
+
+        if (! $isCnpj) {
+            $funcionario = $guard->user();
+
+            if (! $funcionario instanceof Funcionario || blank($funcionario->cnpj_hosp)) {
+                $guard->logout();
+
+                throw ValidationException::withMessages([
+                    'login' => 'Este CPF não está vinculado a um hospital.',
+                ]);
+            }
         }
 
         $request->session()->regenerate();

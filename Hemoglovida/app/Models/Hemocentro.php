@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\HemocentroFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -26,10 +27,17 @@ class Hemocentro extends Authenticatable
 
     protected $fillable = [
         'cnes_hem',
+        'nome_hem',
         'cnpj_hem',
         'endereco_hem',
         'contato_hem',
         'senha_hem',
+    ];
+
+    /** @var array<string, string> */
+    private const ROTULOS_PADRAO = [
+        '0000001' => 'Hemocentro Central',
+        '0000002' => 'Hemocentro Leste',
     ];
 
     public function getAuthPasswordName(): string
@@ -40,6 +48,22 @@ class Hemocentro extends Authenticatable
     protected function casts(): array
     {
         return ['senha_hem' => 'hashed'];
+    }
+
+    protected function rotulo(): Attribute
+    {
+        return Attribute::get(function (): string {
+            if (filled($this->nome_hem)) {
+                return (string) $this->nome_hem;
+            }
+
+            return self::rotuloParaCnes((string) $this->cnes_hem);
+        });
+    }
+
+    public static function rotuloParaCnes(string $cnesHem): string
+    {
+        return self::ROTULOS_PADRAO[$cnesHem] ?? 'Hemocentro '.$cnesHem;
     }
 
     public function funcionarios(): HasMany

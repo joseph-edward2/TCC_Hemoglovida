@@ -1,14 +1,8 @@
 /* ======================================================
    HEMOGLOVIDA — TELA DE ESTOQUE (HOSPITAL)
    ======================================================
-   Importe DEPOIS do base.css:
-
-   <link rel="stylesheet" href="../base.css">
-   <link rel="stylesheet" href="css/estoque.css">
-
-   (Lembrete do que já vimos antes: o número de "../" muda
-   conforme a profundidade da pasta do seu index.html em
-   relação ao base.css — confira a estrutura de pastas!)
+   Estilos específicos da tela de estoque. Deve ser
+   carregado depois do base.css.
    ====================================================== */
 
 
@@ -210,12 +204,12 @@
 
 
 /* ------------------------------------------------------
-   5. GRÁFICO DE CONSUMO (versão simples, sem JS)
+   5. GRÁFICO DE CONSUMO
    ------------------------------------------------------
-   Este é um gráfico "mock": as alturas das barras estão
-   fixas no HTML (via style="height: ...px"), só pra dar a
-   ideia visual. Quando conectar com dados reais, o ideal é
-   gerar essas alturas com JavaScript ou uma lib de gráficos.
+    As alturas das barras e os numeros da escala sao gerados
+    por JavaScript com os totais semanais devolvidos pela API.
+
+
    ------------------------------------------------------ */
 .chart-card {
   background-color: var(--card);
@@ -437,6 +431,47 @@
 .status-tag--utilizado {
   background-color: #e7e5e3;
   color: #5a5a5f;
+}
+
+.status-tag--em-transito {
+  background-color: #e3ecff;
+  color: #3454a5;
+}
+
+.status-tag--descartado {
+  background-color: #fde5e5;
+  color: #a62d2d;
+}
+
+.estoque-mensagem {
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+}
+
+.estoque-erro,
+.estoque-vencida {
+  color: #a62d2d;
+}
+
+.estoque-vencida {
+  font-weight: 700;
+}
+
+.estoque-sucesso {
+  background-color: #e1f2e1;
+  color: #2e7d32;
+}
+
+.estoque-erro {
+  background-color: #fde5e5;
+}
+
+.estoque-vazio {
+  color: var(--ink-soft);
+  padding: 16px;
+  text-align: center;
 }
 
 .table-action-btn {

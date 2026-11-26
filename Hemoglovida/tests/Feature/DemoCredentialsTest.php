@@ -40,15 +40,19 @@ it('autentica com as credenciais de demonstração do hospital', function () {
     $this->assertAuthenticated('hospital');
 });
 
-it('autentica com as credenciais de demonstração do funcionário na página do hospital', function () {
+it('recusa o funcionário de demonstração do hemocentro na página do hospital', function () {
     $this->seed(HemocentroLoginSeeder::class);
 
-    $this->post(route('hospital.login.store'), [
-        'login' => '280.012.389-38',
-        'password' => 'funcionario123',
-    ])->assertRedirectToRoute('hospital.estoque');
+    $this->from(route('hospital.login'))
+        ->post(route('hospital.login.store'), [
+            'login' => '280.012.389-38',
+            'password' => 'funcionario123',
+        ])
+        ->assertRedirectToRoute('hospital.login')
+        ->assertSessionHasErrors(['login' => 'Este CPF não está vinculado a um hospital.']);
 
-    $this->assertAuthenticated('funcionario');
+    $this->assertGuest('funcionario');
+    $this->assertGuest('hospital');
 });
 
 it('usa Renato Gonçalves como responsável demonstrativo do hospital', function () {

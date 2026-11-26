@@ -26,7 +26,8 @@ test('exibe a tela de cadastro de funcionário do hospital para o hospital auten
 });
 
 test('bloqueia funcionário administrativo na tela de cadastro do hospital', function () {
-    $funcionario = Funcionario::factory()->create([
+    $hospital = Hospital::factory()->create();
+    $funcionario = Funcionario::factory()->paraHospital($hospital)->create([
         'tipo_fun' => CargoFuncionario::Administrativo->value,
     ]);
 
@@ -58,7 +59,7 @@ test('bloqueia responsável de hemocentro na tela de cadastro do hospital', func
 
     $this->actingAs($responsavel, 'funcionario')
         ->get(route('hospital.cadastro-funcionario'))
-        ->assertRedirectToRoute('hospital.login');
+        ->assertForbidden();
 });
 
 test('redireciona visitantes da tela de cadastro de funcionário do hospital para o login', function () {
@@ -156,7 +157,8 @@ test('rejeita dados inválidos no cadastro do hospital', function (array $overri
 ]);
 
 test('bloqueia o POST de cadastro do hospital para funcionário administrativo', function () {
-    $funcionario = Funcionario::factory()->create([
+    $hospital = Hospital::factory()->create();
+    $funcionario = Funcionario::factory()->paraHospital($hospital)->create([
         'tipo_fun' => CargoFuncionario::Administrativo->value,
     ]);
 
@@ -186,7 +188,7 @@ test('bloqueia o POST de cadastro do hospital para responsável de hemocentro', 
             'senha_funcionario' => 'senha-segura',
             'tipo_funcionario' => CargoFuncionario::Responsavel->value,
         ])
-        ->assertRedirectToRoute('hospital.login');
+        ->assertForbidden();
 
     expect(Funcionario::count())->toBe(1);
 });

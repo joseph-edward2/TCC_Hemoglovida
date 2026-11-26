@@ -19,6 +19,14 @@ it('uses the singular schema from the official database', function () {
             'endereco_hosp',
             'senha_hosp',
         ]))->toBeTrue()
+        ->and(Schema::hasColumns('hemocentro', [
+            'cnes_hem',
+            'cnpj_hem',
+            'nome_hem',
+            'endereco_hem',
+            'contato_hem',
+            'senha_hem',
+        ]))->toBeTrue()
         ->and(Schema::hasColumns('funcionario', [
             'cod_reg_fun',
             'cnes_hem',
@@ -45,6 +53,7 @@ it('uses the singular schema from the official database', function () {
             'id_ped',
             'data_hora_envio_bolsa',
             'data_hora_recebimento_bolsa',
+            'data_hora_saida_bolsa',
             'paciente_destino_bolsa',
         ]))->toBeTrue();
 });

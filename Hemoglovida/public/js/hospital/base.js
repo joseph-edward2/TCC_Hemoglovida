@@ -18,31 +18,83 @@
 
 
 /**
- * Envia dados em JSON pra uma API via POST e devolve a
- * resposta já convertida em objeto JS.
- *
- * Se a API responder com erro (status fora da faixa 200),
- * a função lança um erro — por isso ela deve ser chamada
- * dentro de um try/catch (veja exemplos nas páginas).
- *
- * Uso:
- *   const dados = await enviarParaAPI('https://.../rota', { titulo: 'x' });
+ * Lê o token CSRF da meta da página. As rotas usam sessão do Laravel,
+ * então toda requisição precisa desse cabeçalho.
  */
-async function enviarParaAPI(url, dados) {
-  const resposta = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dados)
-  });
+function tokenCsrf() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  return meta ? meta.content : '';
+}
 
-  // Tenta ler o corpo da resposta como JSON; se não der, segue com null
+/**
+ * Converte a resposta em objeto e transforma falhas HTTP em erros
+ * legíveis, incluindo mensagens de validação do Laravel.
+ */
+async function tratarRespostaAPI(resposta) {
   const corpo = await resposta.json().catch(function () { return null; });
 
   if (!resposta.ok) {
-    throw new Error((corpo && corpo.message) || 'Não foi possível concluir a solicitação.');
+    const erros = corpo && corpo.errors
+      ? Object.values(corpo.errors).flat().join(' ')
+      : '';
+
+    throw new Error(erros || (corpo && corpo.message) || 'Não foi possível concluir a solicitação.');
   }
 
   return corpo;
+}
+
+/**
+ * Busca dados (GET) na mesma origem da aplicação.
+ *
+ * Uso:
+ *   const dados = await buscarDaAPI('/hospital/estoque/resumo');
+ */
+async function buscarDaAPI(url) {
+  const resposta = await fetch(url, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': tokenCsrf()
+    }
+  });
+
+  return tratarRespostaAPI(resposta);
+}
+
+/**
+ * Envia dados em JSON para a aplicação, com método configurável.
+ * Mantém a assinatura antiga (url, dados) como POST.
+ *
+ * Uso:
+ *   await enviarParaAPI(url, { titulo: 'x' });
+ *   await enviarParaAPI(url, { status: 'disponivel' }, 'PATCH');
+ *   await enviarParaAPI(url, new FormData(form)); // envia arquivos sem JSON
+ */
+async function enviarParaAPI(url, dados, metodo) {
+  const metodoEfetivo = metodo || 'POST';
+  const ehFormData = typeof FormData !== 'undefined' && dados instanceof FormData;
+  const opcoes = {
+    method: metodoEfetivo,
+    credentials: 'same-origin',
+    headers: {
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': tokenCsrf()
+    }
+  };
+
+  if (!ehFormData) {
+    opcoes.headers['Content-Type'] = 'application/json';
+  }
+
+  if (dados !== undefined && metodoEfetivo !== 'GET') {
+    opcoes.body = ehFormData ? dados : JSON.stringify(dados);
+  }
+
+  const resposta = await fetch(url, opcoes);
+
+  return tratarRespostaAPI(resposta);
 }
 
 
@@ -153,37 +205,4 @@ function ativarToggleSenha(botao, input) {
 
   });
 
-}
-
-
-/**
- * Liga o clique nos botões de paginação (.paginacao__botao)
- * de um container: ao clicar num botão, ele vira o "ativo"
- * e os outros perdem o destaque.
- *
- * Serve pra paginação SEM dados dinâmicos (ex: Estoque, onde
- * a tabela ainda não troca de conteúdo de verdade). Se a
- * página precisar buscar dados novos a cada página (como o
- * Atendimento faz), use essa função como referência mas
- * escreva sua própria lógica — ela é específica demais pra
- * entrar aqui no base.js.
- *
- * Uso:
- *   ativarPaginacaoSimples(document.getElementById('paginacao'));
- */
-function ativarPaginacaoSimples(container) {
-  if (!container) return;
-  container.addEventListener('click', function (e) {
-    const botao = e.target.closest('.paginacao__botao');
-    if (!botao || botao.disabled) return;
-
-    // Botões de "anterior"/"próxima" não têm número de página
-    // fixo, então não fazem sentido virar "ativos" sozinhos
-    if (botao.dataset.pagina === 'anterior' || botao.dataset.pagina === 'proxima') return;
-
-    container.querySelectorAll('.paginacao__botao').forEach(function (b) {
-      b.classList.remove('paginacao__botao--ativo');
-    });
-    botao.classList.add('paginacao__botao--ativo');
-  });
 }

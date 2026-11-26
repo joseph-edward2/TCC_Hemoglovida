@@ -144,8 +144,8 @@ it('aceita pedido sem funcionário e bolsa ligada a hospital e pedido', function
 it('semeia o inventário e os pedidos de demonstração do hospital', function () {
     $this->seed(HospitalDemoSeeder::class);
 
-    expect(BolsaSangue::where('cnpj_hosp', '11222333000181')->count())->toBe(20)
-        ->and(Pedido::where('cnpj_hosp', '11222333000181')->count())->toBe(15)
+    expect(BolsaSangue::where('cnpj_hosp', '11222333000181')->count())->toBe(70)
+        ->and(Pedido::where('cnpj_hosp', '11222333000181')->count())->toBe(12)
         ->and(Funcionario::where('cnpj_hosp', '11222333000181')
             ->where('tipo_fun', CargoFuncionario::Responsavel->value)
             ->exists())->toBeTrue();

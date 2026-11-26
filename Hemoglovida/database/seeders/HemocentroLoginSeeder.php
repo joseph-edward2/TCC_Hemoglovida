@@ -14,9 +14,10 @@ class HemocentroLoginSeeder extends Seeder
      */
     public function run(): void
     {
-        $hemocentro = Hemocentro::firstOrCreate(
+        $hemocentro = Hemocentro::updateOrCreate(
             ['cnes_hem' => '0000001'],
             [
+                'nome_hem' => 'Hemocentro Central',
                 'cnpj_hem' => '22333444000181',
                 'endereco_hem' => 'Rua Central, 100',
                 'contato_hem' => '(11) 4000-0001',

@@ -37,9 +37,9 @@ it('autentica um hospital com CNPJ sem máscara e senha do banco', function () {
     $this->assertAuthenticatedAs($hospital, 'hospital');
 });
 
-it('autentica um funcionário com CPF na página do hospital', function () {
-    $funcionario = Funcionario::factory()->create([
-        'cnes_hem' => Hemocentro::factory(),
+it('autentica um funcionário do hospital com CPF na página do hospital', function () {
+    $hospital = Hospital::factory()->create();
+    $funcionario = Funcionario::factory()->paraHospital($hospital)->create([
         'cpf_fun' => '28001238938',
         'senha_fun' => 'funcionario123',
     ]);
@@ -51,6 +51,25 @@ it('autentica um funcionário com CPF na página do hospital', function () {
 
     $response->assertRedirectToRoute('hospital.estoque');
     $this->assertAuthenticatedAs($funcionario, 'funcionario');
+    $this->assertGuest('hospital');
+});
+
+it('recusa funcionário de hemocentro na página do hospital', function () {
+    Funcionario::factory()->create([
+        'cnes_hem' => Hemocentro::factory(),
+        'cpf_fun' => '28001238938',
+        'senha_fun' => 'funcionario123',
+    ]);
+
+    $this->from(route('hospital.login'))
+        ->post(route('hospital.login.store'), [
+            'login' => '280.012.389-38',
+            'password' => 'funcionario123',
+        ])
+        ->assertRedirectToRoute('hospital.login')
+        ->assertSessionHasErrors(['login' => 'Este CPF não está vinculado a um hospital.']);
+
+    $this->assertGuest('funcionario');
     $this->assertGuest('hospital');
 });
 
@@ -125,9 +144,9 @@ it('redireciona visitantes da área do hospital para o login', function () {
         ->assertRedirectToRoute('hospital.login');
 });
 
-it('permite que um funcionário autenticado acesse a área do hospital', function () {
-    $funcionario = Funcionario::factory()->create([
-        'cnes_hem' => Hemocentro::factory(),
+it('permite que um funcionário do hospital autenticado acesse a área do hospital', function () {
+    $hospital = Hospital::factory()->create();
+    $funcionario = Funcionario::factory()->paraHospital($hospital)->create([
         'cpf_fun' => '28001238938',
     ]);
 
@@ -163,9 +182,9 @@ it('exibe o nome do hospital logado no painel', function () {
         ->assertSee(route('hospital.logout'));
 });
 
-it('exibe o nome do funcionário logado no painel do hospital', function () {
-    $funcionario = Funcionario::factory()->create([
-        'cnes_hem' => Hemocentro::factory(),
+it('exibe o nome do funcionário do hospital logado no painel do hospital', function () {
+    $hospital = Hospital::factory()->create();
+    $funcionario = Funcionario::factory()->paraHospital($hospital)->create([
         'cpf_fun' => '28001238938',
         'nome_fun' => 'Funcionário de Teste',
     ]);

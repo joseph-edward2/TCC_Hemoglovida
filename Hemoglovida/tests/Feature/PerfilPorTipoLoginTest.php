@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('exibe a foto de pessoa e o nome do funcionário administrativo nas telas com navbar', function (string $rota) {
+test('exibe a foto de pessoa e o nome do funcionário administrativo do hemocentro nas telas do hemocentro', function (string $rota) {
     $funcionario = Funcionario::factory()->create([
         'cpf_fun' => '28001238938',
         'nome_fun' => 'Funcionário de Teste',
@@ -23,20 +23,38 @@ test('exibe a foto de pessoa e o nome do funcionário administrativo nas telas c
         ->assertDontSee('assets/avatar_instituicao.jpg')
         ->assertSee('Bem-vindo, Funcionário de Teste');
 })->with([
-    'agendamento do hemocentro' => ['hemocentro.agendamento'],
-    'alertas do hemocentro' => ['hemocentro.alertas'],
-    'atendimento do hemocentro' => ['hemocentro.atendimento'],
-    'estoque do hemocentro' => ['hemocentro.estoque'],
-    'pedidos do hemocentro' => ['hemocentro.pedidos'],
-    'início do hemocentro' => ['hemocentro.inicio'],
-    'triagem do hemocentro' => ['hemocentro.triagem'],
-    'minha conta do hemocentro' => ['hemocentro.usuario'],
-    'estoque do hospital' => ['hospital.estoque'],
-    'pedidos do hospital' => ['hospital.pedidos'],
-    'minha conta do hospital' => ['hospital.usuario'],
+    'agendamento' => ['hemocentro.agendamento'],
+    'alertas' => ['hemocentro.alertas'],
+    'atendimento' => ['hemocentro.atendimento'],
+    'estoque' => ['hemocentro.estoque'],
+    'pedidos' => ['hemocentro.pedidos'],
+    'início' => ['hemocentro.inicio'],
+    'triagem' => ['hemocentro.triagem'],
+    'minha conta' => ['hemocentro.usuario'],
 ]);
 
-test('exibe a foto de instituição e o nome do responsável nas telas com navbar', function (string $rota) {
+test('exibe a foto de pessoa e o nome do funcionário administrativo do hospital nas telas do hospital', function (string $rota) {
+    $hospital = Hospital::factory()->create();
+    $funcionario = Funcionario::factory()->paraHospital($hospital)->create([
+        'cpf_fun' => '28001238938',
+        'nome_fun' => 'Funcionário de Teste',
+        'tipo_fun' => CargoFuncionario::Administrativo->value,
+    ]);
+
+    $response = $this->actingAs($funcionario, 'funcionario')
+        ->get(route($rota))
+        ->assertOk();
+
+    $response->assertSee('assets/avatar.jpg')
+        ->assertDontSee('assets/avatar_instituicao.jpg')
+        ->assertSee('Bem-vindo, Funcionário de Teste');
+})->with([
+    'estoque' => ['hospital.estoque'],
+    'pedidos' => ['hospital.pedidos'],
+    'minha conta' => ['hospital.usuario'],
+]);
+
+test('exibe a foto de pessoa e o nome do responsável nas telas com navbar', function (string $rota) {
     $hospital = Hospital::factory()->create();
     $responsavel = Funcionario::factory()->paraHospital($hospital)->create([
         'cpf_fun' => '52998224725',
@@ -48,8 +66,8 @@ test('exibe a foto de instituição e o nome do responsável nas telas com navba
         ->get(route($rota))
         ->assertOk();
 
-    $response->assertSee('assets/avatar_instituicao.jpg')
-        ->assertDontSee('assets/avatar.jpg')
+    $response->assertSee('assets/avatar.jpg')
+        ->assertDontSee('assets/avatar_instituicao.jpg')
         ->assertSee('Bem-vindo, Renato Gonçalves');
 })->with([
     'agendamento do hemocentro' => ['hemocentro.agendamento'],
@@ -102,19 +120,22 @@ test('exibe a foto de instituição e o nome do hospital nas telas com navbar', 
     'minha conta' => ['hospital.usuario'],
 ]);
 
-test('oculta o botão de cadastro de funcionário do administrativo na minha conta', function (string $rota) {
-    $funcionario = Funcionario::factory()->create([
+test('oculta o botão de cadastro de funcionário do administrativo na minha conta', function (string $instituicao, string $rota) {
+    $dados = [
         'cpf_fun' => '28001238938',
         'tipo_fun' => CargoFuncionario::Administrativo->value,
-    ]);
+    ];
+    $funcionario = $instituicao === 'hospital'
+        ? Funcionario::factory()->paraHospital(Hospital::factory()->create())->create($dados)
+        : Funcionario::factory()->create($dados);
 
     $this->actingAs($funcionario, 'funcionario')
         ->get(route($rota))
         ->assertOk()
         ->assertDontSeeText('Cadastro Funcionário');
 })->with([
-    'hemocentro' => ['hemocentro.usuario'],
-    'hospital' => ['hospital.usuario'],
+    'hemocentro' => ['hemocentro', 'hemocentro.usuario'],
+    'hospital' => ['hospital', 'hospital.usuario'],
 ]);
 
 test('mantém o e-mail editável na conta do hospital', function () {
@@ -161,7 +182,7 @@ test('exibe o botão de cadastro apenas na instituição do responsável', funct
         ->assertSee('href="'.route($campo).'"', false);
 })->with([
     'hospital' => ['hospital', 'hemocentro.usuario', 'hospital.usuario', 'hospital.cadastro-funcionario'],
-    'hemocentro' => ['hemocentro', 'hospital.usuario', 'hemocentro.usuario', 'hemocentro.cadastro-funcionario'],
+    'hemocentro' => ['hemocentro', 'hemocentro.estoque', 'hemocentro.usuario', 'hemocentro.cadastro-funcionario'],
 ]);
 
 test('exibe o botão de cadastro de funcionário para o hemocentro na minha conta', function () {
@@ -194,5 +215,5 @@ test('não exibe a ação de encerrar conta na minha conta do hospital', functio
         ->assertDontSee('id="deleteAccountBtn"', false);
 })->with([
     'hospital' => ['hospital', fn () => Hospital::factory()->create()],
-    'funcionário' => ['funcionario', fn () => Funcionario::factory()->create(['cpf_fun' => '28001238938'])],
+    'funcionário' => ['funcionario', fn () => Funcionario::factory()->paraHospital(Hospital::factory()->create())->create(['cpf_fun' => '28001238938'])],
 ]);

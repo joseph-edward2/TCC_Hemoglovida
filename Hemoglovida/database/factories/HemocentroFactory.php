@@ -19,6 +19,7 @@ class HemocentroFactory extends Factory
     {
         return [
             'cnes_hem' => sprintf('%07d', fake()->unique()->numberBetween(1, 9999999)),
+            'nome_hem' => null,
             'cnpj_hem' => fake()->unique()->numerify('##############'),
             'endereco_hem' => fake()->streetAddress(),
             'contato_hem' => fake()->numerify('###########'),

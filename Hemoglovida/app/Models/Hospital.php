@@ -6,6 +6,7 @@ use Database\Factories\HospitalFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Auth;
 
 class Hospital extends Authenticatable
 {
@@ -60,5 +61,21 @@ class Hospital extends Authenticatable
     public function bolsas(): HasMany
     {
         return $this->hasMany(BolsaSangue::class, 'cnpj_hosp', 'cnpj_hosp');
+    }
+
+    /**
+     * Hospital vinculado à sessão atual, seja pelo login da conta ou por um
+     * funcionário. Funcionários de hemocentro não possuem hospital aqui.
+     */
+    public static function daSessao(): ?self
+    {
+        $cnpjHosp = Auth::guard('hospital')->user()?->cnpj_hosp
+            ?? Auth::guard('funcionario')->user()?->cnpj_hosp;
+
+        if ($cnpjHosp === null) {
+            return null;
+        }
+
+        return static::find($cnpjHosp);
     }
 }
