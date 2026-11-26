@@ -7,6 +7,7 @@
 
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link rel="stylesheet" href="{{ asset('css/hemocentro/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/resumo-pedidos.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hemocentro/pedidos.css') }}">
 </head>
 <body>
@@ -80,39 +81,8 @@
     <p role="alert">{{ $errors->first() }}</p>
   @endif
 
-  <section class="ped-stats">
-    <div class="ped-stat-card">
-      <div class="ped-stat-info">
-        <span class="ped-stat-label">Pedidos<br>Pendentes</span>
-        <span class="ped-stat-value" id="statPending">{{ $totais->pendentes }}</span>
-      </div>
-      <i class="ph ph-calendar-check ped-stat-icon"></i>
-    </div>
+  @include('resumo-pedidos')
 
-    <div class="ped-stat-card">
-      <div class="ped-stat-info">
-        <span class="ped-stat-label">Em Separação</span>
-        <span class="ped-stat-value" id="statSeparating">{{ $totais->em_separacao }}</span>
-      </div>
-      <i class="ph ph-clipboard-text ped-stat-icon"></i>
-    </div>
-
-    <div class="ped-stat-card is-success">
-      <div class="ped-stat-info">
-        <span class="ped-stat-label">Enviados Hoje</span>
-        <span class="ped-stat-value" id="statSentToday">{{ $totais->enviados_hoje }}</span>
-      </div>
-      <i class="ph ph-truck ped-stat-icon"></i>
-    </div>
-
-    <div class="ped-stat-card is-critical">
-      <div class="ped-stat-info">
-        <span class="ped-stat-label">Pedidos Críticos</span>
-        <span class="ped-stat-value" id="statCritical">{{ $totais->criticos }}</span>
-      </div>
-      <i class="ph ph-warning ped-stat-icon"></i>
-    </div>
-  </section>
 
   <h2 class="section-title"><i class="ph ph-warning"></i> Pedidos Críticos</h2>
   <div class="critical-list" id="criticalList">

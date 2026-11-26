@@ -8,6 +8,8 @@ use App\Http\Controllers\HemocentroEstoqueController;
 use App\Http\Controllers\HemocentroPedidoController;
 use App\Http\Controllers\HemocentroSessionController;
 use App\Http\Controllers\HemocentroTriagemController;
+use App\Http\Controllers\HospitalPedidoController;
+use App\Http\Controllers\HospitalSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'usuario.index')->name('home');
@@ -51,6 +53,8 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
             ->whereNumber('protocolo')->name('atendimento.concluir');
         Route::get('/Hem_Estoque.blade.php', HemocentroEstoqueController::class)->name('estoque');
         Route::get('/Hem_Pedidos.blade.php', [HemocentroPedidoController::class, 'index'])->name('pedidos');
+        Route::get('/pedidos/{pedido}/requisicao', [HemocentroPedidoController::class, 'requisicao'])
+            ->whereNumber('pedido')->name('pedidos.requisicao');
         Route::get('/pedidos/{pedido}/bolsas', [HemocentroPedidoController::class, 'bolsas'])
             ->whereNumber('pedido')->name('pedidos.bolsas');
         Route::patch('/pedidos/{pedido}/status', [HemocentroPedidoController::class, 'status'])
@@ -66,5 +70,19 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
 
 Route::view('/hospital/Hemocentro_cadastro_funcionario.blade.php', 'hospital.Hemocentro_cadastro_funcionario')->name('hospital.cadastro-funcionario');
 Route::view('/hospital/Hospital_estoque.blade.php', 'hospital.Hospital_estoque')->name('hospital.estoque');
-Route::view('/hospital/Hospital_Login.blade.php', 'hospital.Hospital_Login')->name('hospital.login');
-Route::view('/hospital/Hospital_pedidos.blade.php', 'hospital.Hospital_pedidos')->name('hospital.pedidos');
+
+Route::prefix('hospital')->name('hospital.')->group(function (): void {
+    Route::middleware('guest:hospital')->group(function (): void {
+        Route::view('/Hospital_Login.blade.php', 'hospital.Hospital_Login')->name('login');
+        Route::post('/Hospital_Login.blade.php', [HospitalSessionController::class, 'store'])
+            ->middleware('throttle:10,1,hospital-login')->name('login.store');
+    });
+
+    Route::middleware('auth:hospital')->group(function (): void {
+        Route::get('/Hospital_pedidos.blade.php', [HospitalPedidoController::class, 'index'])->name('pedidos');
+        Route::post('/pedidos', [HospitalPedidoController::class, 'store'])->name('pedidos.store');
+        Route::get('/pedidos/{pedido}/requisicao', [HospitalPedidoController::class, 'requisicao'])
+            ->whereNumber('pedido')->name('pedidos.requisicao');
+        Route::post('/sair', [HospitalSessionController::class, 'destroy'])->name('logout');
+    });
+});

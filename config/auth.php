@@ -2,6 +2,7 @@
 
 use App\Models\Funcionario;
 use App\Models\Hemocentro;
+use App\Models\Hospital;
 use App\Models\User;
 
 return [
@@ -48,6 +49,7 @@ return [
             'driver' => 'session',
             'provider' => 'hemocentros',
         ],
+        'hospital' => ['driver' => 'session', 'provider' => 'hospitais'],
         'funcionario' => [
             'driver' => 'session',
             'provider' => 'funcionarios',
@@ -80,6 +82,7 @@ return [
             'driver' => 'eloquent',
             'model' => Hemocentro::class,
         ],
+        'hospitais' => ['driver' => 'eloquent', 'model' => Hospital::class],
         'funcionarios' => [
             'driver' => 'eloquent',
             'model' => Funcionario::class,

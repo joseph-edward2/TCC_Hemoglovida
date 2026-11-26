@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\DocumentoRequisicao;
 use App\Models\Funcionario;
+use App\ResumoPedidos;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
@@ -14,44 +16,22 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use stdClass;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HemocentroPedidoController extends Controller
 {
-    private const ETAPAS = [
-        'pendente' => 'Recebido',
-        'em_separacao' => 'Em Separação',
-        'enviado' => 'Enviado',
-        'entregue' => 'Entregue',
-    ];
-
-    private const STATUS = self::ETAPAS + ['recusado' => 'Recusado'];
-
     private const URGENCIAS = ['critica' => 'Crítico', 'urgente' => 'Urgente', 'rotina' => 'Rotina'];
-
-    private const TIPOS_SANGUINEOS = ['O-', 'O+', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
-
-    private const FUSO = 'America/Sao_Paulo';
-
-    private const FILA_CRITICA = "COALESCE(urgencia_ped, '') = 'critica' AND status_ped IN ('pendente', 'em_separacao', 'enviado')";
 
     public function index(Request $request): View
     {
         $filtros = $request->validate([
-            'status' => ['nullable', 'string', Rule::in(array_keys(self::STATUS))],
-            'tipo_sanguineo' => ['nullable', 'string', Rule::in(self::TIPOS_SANGUINEOS)],
+            'status' => ['nullable', 'string', Rule::in(array_keys(ResumoPedidos::STATUS))],
+            'tipo_sanguineo' => ['nullable', 'string', Rule::in(ResumoPedidos::TIPOS_SANGUINEOS)],
             'urgencia' => ['nullable', 'string', Rule::in(array_keys(self::URGENCIAS))],
         ]);
 
         $pedidos = DB::table('pedido')->where('pedido.cnes_hem', $request->user()->cnes_hem);
-        $hoje = now(self::FUSO)->toImmutable()->startOfDay();
-        $totais = (clone $pedidos)
-            ->selectRaw("COUNT(CASE WHEN status_ped = 'pendente' THEN 1 END) AS pendentes")
-            ->selectRaw("COUNT(CASE WHEN status_ped = 'em_separacao' THEN 1 END) AS em_separacao")
-            ->selectRaw('COUNT(CASE WHEN data_hora_envio_ped >= ? AND data_hora_envio_ped < ? THEN 1 END) AS enviados_hoje', [
-                $hoje->utc(), $hoje->addDay()->utc(),
-            ])
-            ->selectRaw('COUNT(CASE WHEN '.self::FILA_CRITICA.' THEN 1 END) AS criticos')
-            ->first();
+        $totais = ResumoPedidos::totais($pedidos);
 
         $pedidos->join('hospital', 'hospital.cnpj_hosp', '=', 'pedido.cnpj_hosp')
             ->leftJoin('funcionario', function (JoinClause $join): void {
@@ -67,9 +47,9 @@ class HemocentroPedidoController extends Controller
             }
         }
 
-        $criticos = (clone $pedidos)->whereRaw(self::FILA_CRITICA)
+        $criticos = (clone $pedidos)->whereRaw(ResumoPedidos::FILA_CRITICA)
             ->cursorPaginate(5, cursorName: 'criticos')->appends($filtros)->through($this->prepararPedido(...));
-        $recentes = $pedidos->whereRaw('NOT ('.self::FILA_CRITICA.')')
+        $recentes = $pedidos->whereRaw('NOT ('.ResumoPedidos::FILA_CRITICA.')')
             ->cursorPaginate(5, cursorName: 'recentes')->appends($filtros)->through($this->prepararPedido(...));
 
         return view('hemocentro.Hem_Pedidos', [
@@ -79,10 +59,10 @@ class HemocentroPedidoController extends Controller
             'criticos' => $criticos,
             'recentes' => $recentes,
             'filtros' => $filtros,
-            'status' => self::STATUS,
-            'etapas' => self::ETAPAS,
+            'status' => ResumoPedidos::STATUS,
+            'etapas' => ResumoPedidos::ETAPAS,
             'urgencias' => self::URGENCIAS,
-            'tiposSanguineos' => self::TIPOS_SANGUINEOS,
+            'tiposSanguineos' => ResumoPedidos::TIPOS_SANGUINEOS,
         ]);
     }
 
@@ -92,11 +72,11 @@ class HemocentroPedidoController extends Controller
 
         return DB::table('bolsa_sangue')->where('cnes_hem', $pedido->cnes_hem)
             ->whereRaw('UPPER(TRIM(tipo_bolsa)) = ?', [$tipo])
-            ->whereIn(DB::raw('UPPER(TRIM(tipo_bolsa))'), self::TIPOS_SANGUINEOS)
+            ->whereIn(DB::raw('UPPER(TRIM(tipo_bolsa))'), ResumoPedidos::TIPOS_SANGUINEOS)
             ->whereRaw("LOWER(REPLACE(REPLACE(TRIM(disponibilidade_bolsa), 'Í', 'i'), 'í', 'i')) = 'disponivel'")
             ->where('quant_bolsa', '>', 0)
             ->where(fn (Builder $query): Builder => $query->whereNull('data_venc_bolsa')
-                ->orWhere('data_venc_bolsa', '>=', now(self::FUSO)->toDateString()));
+                ->orWhere('data_venc_bolsa', '>=', now(ResumoPedidos::FUSO)->toDateString()));
     }
 
     public function bolsas(Request $request, int $pedido): View
@@ -191,32 +171,27 @@ class HemocentroPedidoController extends Controller
             }
         }
 
-        return $retorno->with('status', "Pedido #{$pedido}: ".self::STATUS[$destino].'.');
+        return $retorno->with('status', "Pedido #{$pedido}: ".ResumoPedidos::STATUS[$destino].'.');
     }
 
     private function prepararPedido(stdClass $pedido): stdClass
     {
         $pedido->quantidade = $pedido->quant_ped.((int) $pedido->quant_ped === 1 ? ' bolsa' : ' bolsas');
-        $pedido->solicitadoEm = CarbonImmutable::parse($pedido->data_hora_ped, 'UTC')->setTimezone(self::FUSO)->format('d/m/Y H:i');
+        $pedido->solicitadoEm = CarbonImmutable::parse($pedido->data_hora_ped, 'UTC')->setTimezone(ResumoPedidos::FUSO)->format('d/m/Y H:i');
         $pedido->enviadoEm = $pedido->data_hora_envio_ped === null ? null
-            : CarbonImmutable::parse($pedido->data_hora_envio_ped, 'UTC')->setTimezone(self::FUSO)->format('d/m/Y H:i');
-        $pedido->situacao = self::STATUS[$pedido->status_ped] ?? Str::ucfirst(str_replace('_', ' ', $pedido->status_ped));
+            : CarbonImmutable::parse($pedido->data_hora_envio_ped, 'UTC')->setTimezone(ResumoPedidos::FUSO)->format('d/m/Y H:i');
+        $pedido->situacao = ResumoPedidos::STATUS[$pedido->status_ped] ?? Str::ucfirst(str_replace('_', ' ', $pedido->status_ped));
         $pedido->urgencia = self::URGENCIAS[$pedido->urgencia_ped] ?? $pedido->urgencia_ped ?? 'Não informada';
-        $pedido->requisicao = $this->urlRequisicao($pedido->url_requisicao_transfusao_ped);
+        $pedido->requisicao = DocumentoRequisicao::url($pedido->url_requisicao_transfusao_ped, $pedido->id_ped, 'hemocentro.pedidos.requisicao');
 
         return $pedido;
     }
 
-    private function urlRequisicao(?string $valor): ?string
+    public function requisicao(Request $request, int $pedido): StreamedResponse
     {
-        $valor = trim($valor ?? '');
-        if (Str::isUrl($valor, ['http', 'https'])) {
-            return $valor;
-        }
-        if ($valor === '' || preg_match('~^(?:[a-z][a-z0-9+.-]*:|//)|[[:cntrl:]\\\\]~i', $valor)) {
-            return null;
-        }
+        $arquivo = DB::table('pedido')->where('id_ped', $pedido)->where('cnes_hem', $request->user()->cnes_hem)
+            ->value('url_requisicao_transfusao_ped');
 
-        return url('/'.ltrim($valor, '/'));
+        return DocumentoRequisicao::exibir($arquivo, $pedido);
     }
 }

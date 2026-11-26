@@ -187,50 +187,7 @@ nav a:hover{ color:#fff; }
 }
 
 
-.ped-stats{
-  display:grid;
-  grid-template-columns:repeat(4, 1fr);
-  gap:20px;
-  margin-bottom:40px;
-}
 
-.ped-stat-card{
-  background:var(--card);
-  border-left:5px solid var(--brand);
-  border-radius:12px;
-  padding:22px 24px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  box-shadow:var(--shadow);
-}
-
-.ped-stat-card.is-success{ border-left-color:var(--success); }
-
-.ped-stat-card.is-critical{
-  background:var(--brand);
-  border-left-color:var(--brand-dark);
-  color:#fff;
-}
-
-.ped-stat-info{ display:flex; flex-direction:column; gap:10px; }
-
-.ped-stat-label{
-  font-size:12.5px;
-  font-weight:700;
-  letter-spacing:.03em;
-  text-transform:uppercase;
-  color:var(--ink-soft);
-  line-height:1.35;
-}
-.ped-stat-card.is-critical .ped-stat-label{ color:rgba(255,255,255,.85); }
-
-.ped-stat-value{ font-size:34px; font-weight:800; color:var(--ink); line-height:1; }
-.ped-stat-card.is-critical .ped-stat-value{ color:#fff; }
-
-.ped-stat-icon{ font-size:24px; color:var(--brand); opacity:.9; }
-.ped-stat-card.is-success .ped-stat-icon{ color:var(--success); }
-.ped-stat-card.is-critical .ped-stat-icon{ color:#fff; opacity:1; }
 
 
 .section-title{
@@ -513,7 +470,6 @@ nav a:hover{ color:#fff; }
 
 
 @media (max-width:1080px){
-  .ped-stats{ grid-template-columns:repeat(2, 1fr); }
   .critical-meta{ grid-template-columns:repeat(2, 1fr); }
   .critical-actions{ grid-column:auto; justify-self:start; flex-direction:row; flex-wrap:wrap; }
 }
@@ -523,7 +479,6 @@ nav a:hover{ color:#fff; }
   .header-left{ gap:20px; flex-wrap:wrap; }
   nav{ gap:18px; flex-wrap:wrap; }
   .dashboard{ padding:24px 18px 40px; }
-  .ped-stats{ grid-template-columns:1fr; }
   .page-header{ flex-direction:column; }
   .pedidos-filters{ align-items:stretch; width:100%; }
   .filter-select-row{ flex-direction:column; }

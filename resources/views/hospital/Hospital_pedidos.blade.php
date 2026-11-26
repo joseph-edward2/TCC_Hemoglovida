@@ -7,6 +7,7 @@
 
 
   <link rel="stylesheet" href="{{ asset('css/hospital/base.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/resumo-pedidos.css') }}">
   <link rel="stylesheet" href="{{ asset('css/hospital/pedidos.css') }}">
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 </head>
@@ -49,38 +50,12 @@
          ==================================================== -->
     <div class="page-top">
       <h1>Requisições de Sangue</h1>
-      <button class="btn" id="btnNovaRequisicao">+ Nova Requisição</button>
     </div>
 
     <!-- ====================================================
          FAIXA DE RESUMO
          ==================================================== -->
-    <div class="summary-grid">
-      <div class="summary-card">
-        <div>
-          <div class="summary-card__label">Requisições Pendentes</div>
-          <div class="summary-card__value">12</div>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div>
-          <div class="summary-card__label">Em Separação</div>
-          <div class="summary-card__value">05</div>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div>
-          <div class="summary-card__label">Recebidos Hoje</div>
-          <div class="summary-card__value">08</div>
-        </div>
-      </div>
-      <div class="summary-card summary-card--critical">
-        <div>
-          <div class="summary-card__label">Pedidos Críticos</div>
-          <div class="summary-card__value">03</div>
-        </div>
-      </div>
-    </div>
+    @include('resumo-pedidos')
 
     <!-- ====================================================
          LAYOUT EM DUAS COLUNAS: formulário + tabela
@@ -91,24 +66,31 @@
       <div class="request-card" id="formNovaRequisicao">
         <h2 class="request-card__title">Solicitar Bolsas</h2>
 
-        <form id="formRequisicao">
+        @if (session('status'))
+          <p class="msg msg--success" role="status">{{ session('status') }}</p>
+        @endif
+        @if ($errors->any())
+          <ul class="msg msg--error" role="alert">
+            @foreach ($errors->all() as $erro)
+              <li>{{ $erro }}</li>
+            @endforeach
+          </ul>
+        @endif
+
+        <form id="formRequisicao" method="POST" action="{{ route('hospital.pedidos.store') }}" enctype="multipart/form-data">
+          @csrf
 
           <!-- Tipo sanguíneo -->
           <div class="form-section">
-            <label class="form-section__label">Tipo Sanguíneo Requerido</label>
-            <!-- Os botões abaixo funcionam tipo um "rádio": só um fica
-                 ativo por vez (comportamento controlado via JS) -->
-            <div class="blood-select" id="tipoSanguineo">
-              <button type="button" class="blood-select__btn">O-</button>
-              <button type="button" class="blood-select__btn">O+</button>
-              <button type="button" class="blood-select__btn">A-</button>
-              <button type="button" class="blood-select__btn">A+</button>
-              <button type="button" class="blood-select__btn">B-</button>
-              <button type="button" class="blood-select__btn">B+</button>
-              <button type="button" class="blood-select__btn">AB-</button>
+            <span class="form-section__label" id="labelTipoSanguineo">Tipo Sanguíneo Requerido</span>
+            <div class="blood-select" role="radiogroup" aria-labelledby="labelTipoSanguineo">
+              @foreach ($tiposSanguineos as $tipo)
+                <label class="blood-select__btn">
+                  <input type="radio" name="tipo_sanguineo" value="{{ $tipo }}" @checked(old('tipo_sanguineo') === $tipo) required>
+                  {{ $tipo }}
+                </label>
+              @endforeach
             </div>
-            <!-- Guarda o tipo escolhido pra enviar junto no formulário -->
-            <input type="hidden" name="tipo_sanguineo" id="tipoSanguineoValor">
           </div>
 
           <div class="form-row">
@@ -117,7 +99,7 @@
               <label class="form-section__label">Quantidade de bolsas</label>
               <div class="qty-stepper">
                 <button type="button" class="qty-stepper__btn" id="qtyMenos">−</button>
-                <input type="number" class="qty-stepper__input" id="qtyInput" name="quantidade" value="2" min="1">
+                <input type="number" class="qty-stepper__input" id="qtyInput" name="quantidade" value="{{ is_scalar(old('quantidade', 2)) ? old('quantidade', 2) : '' }}" min="1" max="2147483647" required>
                 <button type="button" class="qty-stepper__btn" id="qtyMais">+</button>
               </div>
             </div>
@@ -126,9 +108,9 @@
             <div class="form-section">
               <label class="form-section__label">Urgência</label>
               <select class="field__select" name="urgencia">
-                <option value="rotina">Rotina</option>
-                <option value="urgente">Urgente</option>
-                <option value="critica" selected>Crítica</option>
+                <option value="rotina" @selected(old('urgencia') === 'rotina')>Rotina</option>
+                <option value="urgente" @selected(old('urgencia') === 'urgente')>Urgente</option>
+                <option value="critica" @selected(old('urgencia', 'critica') === 'critica')>Crítica</option>
               </select>
             </div>
           </div>
@@ -136,28 +118,25 @@
           <!-- Paciente / Setor -->
           <div class="form-section">
             <label class="form-section__label">Paciente / Setor</label>
-            <input type="text" class="field__input" name="paciente_setor" placeholder="Ex: João Silva - UTI Cardiovascular">
+            <input type="text" class="field__input" name="paciente_setor" maxlength="255" value="{{ is_string(old('paciente_setor')) ? old('paciente_setor') : '' }}" placeholder="Ex: João Silva - UTI Cardiovascular">
           </div>
 
           <!-- Hemocentro de destino -->
           <div class="form-section">
             <label class="form-section__label">Hemocentro de Destino</label>
 
-            <label class="hemo-option">
-              <input type="radio" name="hemocentro" value="central" class="hemo-option__radio" checked>
-              <div>
-                <div class="hemo-option__name">Hemocentro Central (2km)</div>
-                <div class="hemo-option__status hemo-option__status--disponivel">Estoque Disponível</div>
-              </div>
-            </label>
-
-            <label class="hemo-option">
-              <input type="radio" name="hemocentro" value="leste" class="hemo-option__radio">
-              <div>
-                <div class="hemo-option__name">Hemocentro Leste (5km)</div>
-                <div class="hemo-option__status hemo-option__status--baixo">Estoque Baixo</div>
-              </div>
-            </label>
+            @forelse ($hemocentros as $hemocentro)
+              <label class="hemo-option">
+                <input type="radio" name="hemocentro" value="{{ $hemocentro->cnes_hem }}" class="hemo-option__radio"
+                  @checked(old('hemocentro', $loop->first ? $hemocentro->cnes_hem : null) === $hemocentro->cnes_hem) required>
+                <span>
+                  <span class="hemo-option__name">CNES {{ $hemocentro->cnes_hem }}</span>
+                  <span class="hemo-option__status">{{ $hemocentro->endereco_hem }}</span>
+                </span>
+              </label>
+            @empty
+              <p>Nenhum hemocentro cadastrado para receber requisições.</p>
+            @endforelse
           </div>
 
           <!-- Documento assinado -->
@@ -167,34 +146,29 @@
               <div class="upload-box__icon"><i class="ph ph-file-pdf" aria-hidden="true"></i></div>
               <div class="upload-box__info">
                 <div class="upload-box__name" id="nomeArquivo">Nenhum arquivo selecionado</div>
-                <div class="upload-box__meta" id="metaArquivo">Envie o PDF assinado da requisição</div>
+                <div class="upload-box__meta" id="metaArquivo">PDF assinado, até 10 MB (opcional)</div>
               </div>
               <button type="button" class="btn-outline-sm" id="btnTrocarArquivo">Escolher arquivo</button>
-              <input type="file" id="inputArquivo" accept=".pdf" hidden>
+              <input type="file" name="documento" id="inputArquivo" accept=".pdf,application/pdf" hidden>
             </div>
           </div>
 
-          <button type="submit" class="btn">Enviar Requisição</button>
+          <button type="submit" class="btn" @disabled($hemocentros->isEmpty())>Enviar Requisição</button>
         </form>
-
-        <p class="msg" id="msg" hidden></p>
       </div>
 
       <!-- ---------- COLUNA DIREITA: TABELA + BANNER ---------- -->
       <div>
-        <div class="monitor-card">
+        <div class="monitor-card" id="acompanhamento">
           <div class="monitor-card__head">
-            <h2>Monitoramento em Tempo Real</h2>
-            <span class="status-online">
-              <span class="status-online__dot"></span>
-              Sistema Online
-            </span>
+            <h2>Acompanhamento das requisições</h2>
           </div>
 
           <div class="table-scroll">
             <table class="requests-table">
               <thead>
                 <tr>
+                  <th>CNES do hemocentro</th>
                   <th>Tipo</th>
                   <th>Qtd</th>
                   <th>Urgência</th>
@@ -203,64 +177,64 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Linha crítica: estágio atual = "Em Separação" (3ª etapa de 5) -->
-                <tr>
-                  <td><span class="blood-tag">O-</span></td>
-                  <td>04 unid.</td>
-                  <td><span class="urgencia-tag urgencia-tag--critica">CRÍTICA</span></td>
-                  <td>
-                    <div class="timeline">
-                      <span class="timeline__dot timeline__dot--done"></span>
-                      <span class="timeline__line timeline__line--done"></span>
-                      <span class="timeline__dot timeline__dot--current"></span>
-                      <span class="timeline__line"></span>
-                      <span class="timeline__dot"></span>
-                      <span class="timeline__line"></span>
-                      <span class="timeline__dot"></span>
-                    </div>
-                    <span class="timeline__label">Em Separação</span>
-                  </td>
-                  <td><button class="btn-outline-sm">Ver PDF</button></td>
-                </tr>
-
-                <!-- Linha normal: já concluída ("Entregue") -->
-                <tr>
-                  <td><span class="blood-tag">A+</span></td>
-                  <td>02 unid.</td>
-                  <td><span class="urgencia-tag urgencia-tag--rotina">ROTINA</span></td>
-                  <td>
-                    <div class="timeline">
-                      <span class="timeline__dot timeline__dot--done"></span>
-                      <span class="timeline__line timeline__line--done"></span>
-                      <span class="timeline__dot timeline__dot--done"></span>
-                      <span class="timeline__line timeline__line--done"></span>
-                      <span class="timeline__dot timeline__dot--done"></span>
-                    </div>
-                    <span class="timeline__label">Entregue</span>
-                  </td>
-                  <td><button class="btn-outline-sm">Ver PDF</button></td>
-                </tr>
-
-                <!-- Linha urgente: estágio atual = "Enviado" (2ª etapa) -->
-                <tr>
-                  <td><span class="blood-tag">B-</span></td>
-                  <td>01 unid.</td>
-                  <td><span class="urgencia-tag urgencia-tag--urgente">URGENTE</span></td>
-                  <td>
-                    <div class="timeline">
-                      <span class="timeline__dot timeline__dot--done"></span>
-                      <span class="timeline__line timeline__line--done"></span>
-                      <span class="timeline__dot timeline__dot--current"></span>
-                      <span class="timeline__line"></span>
-                      <span class="timeline__dot"></span>
-                    </div>
-                    <span class="timeline__label">Enviado</span>
-                  </td>
-                  <td><button class="btn-outline-sm">Ver PDF</button></td>
-                </tr>
+                @forelse ($pedidos as $pedido)
+                  <tr>
+                    <td>{{ $pedido->cnes_hem }}</td>
+                    <td><span class="blood-tag">{{ $pedido->tipo_sanguineo_ped ?? '—' }}</span></td>
+                    <td>{{ $pedido->quant_ped }} unid.</td>
+                    <td>
+                      <span @class(['urgencia-tag', 'urgencia-tag--'.$pedido->urgencia_ped => isset($urgencias[$pedido->urgencia_ped])])>
+                        {{ $urgencias[$pedido->urgencia_ped] ?? $pedido->urgencia_ped ?? 'Não informada' }}
+                      </span>
+                    </td>
+                    <td>
+                      @isset($etapas[$pedido->status_ped])
+                        <div class="timeline" aria-hidden="true">
+                          @foreach ($etapas as $status => $rotulo)
+                            <span @class(['timeline__dot', 'timeline__dot--current' => $status === $pedido->status_ped]) title="{{ $rotulo }}"></span>
+                            @unless ($loop->last)
+                              <span class="timeline__line"></span>
+                            @endunless
+                          @endforeach
+                        </div>
+                      @endisset
+                      <span class="timeline__label">{{ $pedido->situacao }}</span>
+                    </td>
+                    <td>
+                      @if ($pedido->requisicao)
+                        <a class="btn-outline-sm" href="{{ $pedido->requisicao }}" target="_blank" rel="noreferrer">Ver documento</a>
+                      @else
+                        Sem documento
+                      @endif
+                    </td>
+                  </tr>
+                @empty
+                  <tr><td class="requests-table__empty" colspan="6">{{ $pedidos->total() === 0 ? 'Nenhuma requisição registrada.' : 'Nenhuma requisição nesta página.' }}</td></tr>
+                @endforelse
               </tbody>
             </table>
           </div>
+          @if ($pedidos->total() > 0)
+            <div class="monitor-card__footer">
+              @if ($pedidos->isNotEmpty())
+                <span>Mostrando {{ $pedidos->firstItem() }}–{{ $pedidos->lastItem() }} de {{ $pedidos->total() }} {{ $pedidos->total() === 1 ? 'requisição' : 'requisições' }}</span>
+              @endif
+              @if ($pedidos->hasPages())
+                <div class="monitor-card__pages" role="navigation" aria-label="Paginação das requisições">
+                  @if ($pedidos->previousPageUrl())
+                    <a class="btn-outline-sm" href="{{ $pedidos->previousPageUrl() }}" rel="prev">Anterior</a>
+                  @else
+                    <button class="btn-outline-sm" type="button" disabled>Anterior</button>
+                  @endif
+                  @if ($pedidos->nextPageUrl())
+                    <a class="btn-outline-sm" href="{{ $pedidos->nextPageUrl() }}" rel="next">Próxima</a>
+                  @else
+                    <button class="btn-outline-sm" type="button" disabled>Próxima</button>
+                  @endif
+                </div>
+              @endif
+            </div>
+          @endif
         </div>
 
         <!-- Banner informativo (o conteúdo original desse bloco não veio
@@ -270,9 +244,8 @@
           <div class="info-banner__text">
             <h3>Como funciona o acompanhamento</h3>
             <p>
-              Cada requisição passa por até 5 etapas: recebida, em análise,
-              em separação, enviada e entregue. Acompanhe o status de cada
-              pedido em tempo real na tabela acima.
+              A linha do tempo mostra quando o hemocentro recebe, separa e envia as bolsas
+              e quando a entrega é registrada. Atualize a página para consultar o status mais recente.
             </p>
           </div>
         </div>
