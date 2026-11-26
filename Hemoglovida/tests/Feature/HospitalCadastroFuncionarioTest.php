@@ -15,13 +15,13 @@ test('exibe a tela de cadastro de funcionário do hospital para o hospital auten
     $this->actingAs($hospital, 'hospital')
         ->get(route('hospital.cadastro-funcionario'))
         ->assertOk()
-        ->assertSeeText('Cadastro de Funcionário')
+        ->assertSeeText('Gestão de Funcionários')
         ->assertSee('name="nome_funcionario"', false)
         ->assertSee('name="cpf_funcionario"', false)
         ->assertSee('name="senha_funcionario"', false)
         ->assertSee('name="tipo_funcionario"', false)
         ->assertSee('name="_token"', false)
-        ->assertSee('action="'.route('hospital.funcionario.store').'"', false)
+        ->assertSee('action="'.route('hospital.funcionarios.store').'"', false)
         ->assertDontSee('name="codigo_registro_funcionario"', false);
 });
 
@@ -46,8 +46,8 @@ test('exibe a tela de cadastro do hospital para o responsável autenticado', fun
     $this->actingAs($responsavel, 'funcionario')
         ->get(route('hospital.cadastro-funcionario'))
         ->assertOk()
-        ->assertSeeText('Cadastro de Funcionário')
-        ->assertSee('action="'.route('hospital.funcionario.store').'"', false);
+        ->assertSeeText('Gestão de Funcionários')
+        ->assertSee('action="'.route('hospital.funcionarios.store').'"', false);
 });
 
 test('bloqueia responsável de hemocentro na tela de cadastro do hospital', function () {
@@ -71,13 +71,13 @@ test('cadastra funcionário vinculado ao hospital da sessão', function () {
     $hospital = Hospital::factory()->create(['cnpj_hosp' => '11222333000181']);
 
     $this->actingAs($hospital, 'hospital')
-        ->post(route('hospital.funcionario.store'), [
+        ->post(route('hospital.funcionarios.store'), [
             'nome_funcionario' => 'João da Silva',
             'cpf_funcionario' => '529.982.247-25',
             'senha_funcionario' => 'senha-segura',
             'tipo_funcionario' => CargoFuncionario::Responsavel->value,
         ])
-        ->assertRedirectToRoute('hospital.cadastro-funcionario')
+        ->assertRedirectToRoute('hospital.funcionarios')
         ->assertSessionHas('status', 'Funcionário cadastrado com sucesso.');
 
     $funcionario = Funcionario::firstOrFail();
@@ -99,14 +99,14 @@ test('responsável do hospital cadastra funcionário no próprio vínculo', func
     ]);
 
     $this->actingAs($responsavel, 'funcionario')
-        ->post(route('hospital.funcionario.store'), [
+        ->post(route('hospital.funcionarios.store'), [
             'nome_funcionario' => 'João da Silva',
             'cpf_funcionario' => '52998224725',
             'senha_funcionario' => 'senha-segura',
             'tipo_funcionario' => CargoFuncionario::Administrativo->value,
             'cnpj_hosp' => '99999999999999',
         ])
-        ->assertRedirectToRoute('hospital.cadastro-funcionario')
+        ->assertRedirectToRoute('hospital.funcionarios')
         ->assertSessionHas('status', 'Funcionário cadastrado com sucesso.');
 
     $criado = Funcionario::where('cpf_fun', '52998224725')->firstOrFail();
@@ -120,7 +120,7 @@ test('ignora a instituição enviada no payload e usa somente a sessão do hospi
     $hemocentro = Hemocentro::factory()->create();
 
     $this->actingAs($hospital, 'hospital')
-        ->post(route('hospital.funcionario.store'), [
+        ->post(route('hospital.funcionarios.store'), [
             'nome_funcionario' => 'João da Silva',
             'cpf_funcionario' => '52998224725',
             'senha_funcionario' => 'senha-segura',
@@ -128,7 +128,7 @@ test('ignora a instituição enviada no payload e usa somente a sessão do hospi
             'cnes_hem' => $hemocentro->cnes_hem,
             'cnpj_hosp' => '99999999999999',
         ])
-        ->assertRedirectToRoute('hospital.cadastro-funcionario');
+        ->assertRedirectToRoute('hospital.funcionarios');
 
     $funcionario = Funcionario::firstOrFail();
 
@@ -140,7 +140,7 @@ test('rejeita dados inválidos no cadastro do hospital', function (array $overri
     $hospital = Hospital::factory()->create();
 
     $this->actingAs($hospital, 'hospital')
-        ->post(route('hospital.funcionario.store'), array_merge([
+        ->post(route('hospital.funcionarios.store'), array_merge([
             'nome_funcionario' => 'João da Silva',
             'cpf_funcionario' => '52998224725',
             'senha_funcionario' => 'senha-segura',
@@ -152,6 +152,7 @@ test('rejeita dados inválidos no cadastro do hospital', function (array $overri
 })->with([
     'CPF inválido' => [['cpf_funcionario' => '52998224726'], 'cpf_funcionario'],
     'senha curta' => [['senha_funcionario' => '123'], 'senha_funcionario'],
+    'confirmação divergente' => [['senha_funcionario_confirmation' => 'outra-senha'], 'senha_funcionario'],
     'cargo inexistente' => [['tipo_funcionario' => 'Inexistente'], 'tipo_funcionario'],
     'sem nome' => [['nome_funcionario' => ''], 'nome_funcionario'],
 ]);
@@ -182,7 +183,7 @@ test('bloqueia o POST de cadastro do hospital para responsável de hemocentro', 
     ]);
 
     $this->actingAs($responsavel, 'funcionario')
-        ->post(route('hospital.funcionario.store'), [
+        ->post(route('hospital.funcionarios.store'), [
             'nome_funcionario' => 'João da Silva',
             'cpf_funcionario' => '52998224725',
             'senha_funcionario' => 'senha-segura',
@@ -206,8 +207,8 @@ test('limita a 20 cadastros por minuto no hospital', function () {
     ];
 
     for ($requisicao = 0; $requisicao < 20; $requisicao++) {
-        $this->postJson(route('hospital.funcionario.store'), $payload)->assertStatus(422);
+        $this->postJson(route('hospital.funcionarios.store'), $payload)->assertStatus(422);
     }
 
-    $this->postJson(route('hospital.funcionario.store'), $payload)->assertStatus(429);
+    $this->postJson(route('hospital.funcionarios.store'), $payload)->assertStatus(429);
 });

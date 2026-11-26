@@ -22,6 +22,9 @@
       <nav>
         <a href="{{ route('hospital.estoque') }}" class="active">Estoque</a>
         <a href="{{ route('hospital.pedidos') }}">Pedidos</a>
+      @can('gerenciar-funcionarios', 'hospital')
+        <a href="{{ route('hospital.funcionarios') }}">Funcionários</a>
+      @endcan
       </nav>
     </div>
 

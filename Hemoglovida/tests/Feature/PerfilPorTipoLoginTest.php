@@ -120,24 +120,6 @@ test('exibe a foto de instituição e o nome do hospital nas telas com navbar', 
     'minha conta' => ['hospital.usuario'],
 ]);
 
-test('oculta o botão de cadastro de funcionário do administrativo na minha conta', function (string $instituicao, string $rota) {
-    $dados = [
-        'cpf_fun' => '28001238938',
-        'tipo_fun' => CargoFuncionario::Administrativo->value,
-    ];
-    $funcionario = $instituicao === 'hospital'
-        ? Funcionario::factory()->paraHospital(Hospital::factory()->create())->create($dados)
-        : Funcionario::factory()->create($dados);
-
-    $this->actingAs($funcionario, 'funcionario')
-        ->get(route($rota))
-        ->assertOk()
-        ->assertDontSeeText('Cadastro Funcionário');
-})->with([
-    'hemocentro' => ['hemocentro', 'hemocentro.usuario'],
-    'hospital' => ['hospital', 'hospital.usuario'],
-]);
-
 test('mantém o e-mail editável na conta do hospital', function () {
     $funcionario = Funcionario::factory()->paraHospital(Hospital::factory()->create())->create([
         'cpf_fun' => '52998224725',
@@ -160,50 +142,46 @@ test('exibe o botão Sair da conta do hospital com o ícone do hemocentro', func
         ->assertSee('<button type="submit" class="btn-logout"><i class="ph ph-sign-out" aria-hidden="true"></i> Sair</button>', false);
 });
 
-test('exibe o botão de cadastro apenas na instituição do responsável', function (string $instituicao, string $rotaSemBotao, string $rotaComBotao, string $campo) {
-    $responsavel = $instituicao === 'hospital'
-        ? Funcionario::factory()->paraHospital(Hospital::factory()->create())->create([
-            'cpf_fun' => '52998224725',
-            'tipo_fun' => CargoFuncionario::Responsavel->value,
-        ])
-        : Funcionario::factory()->paraHemocentro(Hemocentro::factory()->create())->create([
-            'cpf_fun' => '52998224725',
-            'tipo_fun' => CargoFuncionario::Responsavel->value,
-        ]);
+test('a conta não exibe o botão de cadastro de funcionário, que agora fica na navbar', function (callable $criarUsuario, string $guard, string $rotaConta, string $rotaFuncionarios) {
+    $usuario = $criarUsuario();
 
-    $this->actingAs($responsavel, 'funcionario')
-        ->get(route($rotaSemBotao))
+    $this->actingAs($usuario, $guard)
+        ->get(route($rotaConta))
         ->assertOk()
-        ->assertDontSeeText('Cadastro Funcionário');
-
-    $this->get(route($rotaComBotao))
-        ->assertOk()
-        ->assertSeeText('Cadastro Funcionário')
-        ->assertSee('href="'.route($campo).'"', false);
+        ->assertDontSeeText('Cadastro Funcionário')
+        ->assertSee('href="'.route($rotaFuncionarios).'"', false);
 })->with([
-    'hospital' => ['hospital', 'hemocentro.usuario', 'hospital.usuario', 'hospital.cadastro-funcionario'],
-    'hemocentro' => ['hemocentro', 'hemocentro.estoque', 'hemocentro.usuario', 'hemocentro.cadastro-funcionario'],
+    'hospital' => [
+        fn () => Hospital::factory()->create(),
+        'hospital',
+        'hospital.usuario',
+        'hospital.funcionarios',
+    ],
+    'hemocentro' => [
+        fn () => Hemocentro::factory()->create(),
+        'hemocentro',
+        'hemocentro.usuario',
+        'hemocentro.funcionarios',
+    ],
+    'responsável do hospital' => [
+        fn () => Funcionario::factory()->paraHospital(Hospital::factory()->create())->create([
+            'cpf_fun' => '52998224725',
+            'tipo_fun' => CargoFuncionario::Responsavel->value,
+        ]),
+        'funcionario',
+        'hospital.usuario',
+        'hospital.funcionarios',
+    ],
+    'responsável do hemocentro' => [
+        fn () => Funcionario::factory()->paraHemocentro(Hemocentro::factory()->create())->create([
+            'cpf_fun' => '52998224725',
+            'tipo_fun' => CargoFuncionario::Responsavel->value,
+        ]),
+        'funcionario',
+        'hemocentro.usuario',
+        'hemocentro.funcionarios',
+    ],
 ]);
-
-test('exibe o botão de cadastro de funcionário para o hemocentro na minha conta', function () {
-    $hemocentro = Hemocentro::factory()->create();
-
-    $this->actingAs($hemocentro, 'hemocentro')
-        ->get(route('hemocentro.usuario'))
-        ->assertOk()
-        ->assertSeeText('Cadastro Funcionário')
-        ->assertSee('href="'.route('hemocentro.cadastro-funcionario').'"', false);
-});
-
-test('exibe o botão de cadastro de funcionário para o hospital na minha conta', function () {
-    $hospital = Hospital::factory()->create();
-
-    $this->actingAs($hospital, 'hospital')
-        ->get(route('hospital.usuario'))
-        ->assertOk()
-        ->assertSeeText('Cadastro Funcionário')
-        ->assertSee('href="'.route('hospital.cadastro-funcionario').'"', false);
-});
 
 test('não exibe a ação de encerrar conta na minha conta do hospital', function (string $guard, callable $criarUsuario) {
     $usuario = $criarUsuario();

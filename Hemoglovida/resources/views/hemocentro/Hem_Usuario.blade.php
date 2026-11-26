@@ -24,6 +24,9 @@
       <a href="Hem_Agendamento.blade.php">Agendamentos</a>
       <a href="Hem_Pedidos.blade.php">Pedidos</a>
       <a href="Hem_Alertas.blade.php">Alertas</a>
+      @can('gerenciar-funcionarios', 'hemocentro')
+        <a href="{{ route('hemocentro.funcionarios') }}">Funcionários</a>
+      @endcan
     </nav>
   </div>
 
@@ -99,9 +102,6 @@
 
   <div class="bottom-actions">
     <button class="btn-solid" id="saveBtn">Salvar Alterações</button>
-    @if ($podeCadastrarFuncionario('hemocentro'))
-      <a class="btn-solid" href="{{ route('hemocentro.cadastro-funcionario') }}">Cadastro Funcionário</a>
-    @endif
     <form method="POST" action="{{ route('hemocentro.logout') }}">
       @csrf
       <button type="submit" class="btn-logout"><i class="ph ph-sign-out" aria-hidden="true"></i> Sair</button>

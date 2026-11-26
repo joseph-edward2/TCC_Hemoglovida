@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\GaranteAcessoCadastroFuncionario;
+use App\Http\Middleware\GaranteGerenciarFuncionarios;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'cadastro-funcionario' => GaranteAcessoCadastroFuncionario::class,
+            'gerenciar-funcionarios' => GaranteGerenciarFuncionarios::class,
         ]);
 
         $middleware->redirectGuestsTo(function (Request $request): string {

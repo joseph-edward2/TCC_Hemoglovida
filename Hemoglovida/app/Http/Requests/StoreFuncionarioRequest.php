@@ -35,7 +35,13 @@ abstract class StoreFuncionarioRequest extends FormRequest
                 new Cpf,
                 Rule::unique('funcionario', 'cpf_fun'),
             ],
-            'senha_funcionario' => ['required', 'string', 'min:8', 'max:255'],
+            'senha_funcionario' => [
+                'required',
+                'string',
+                'min:8',
+                'max:255',
+                Rule::when($this->has('senha_funcionario_confirmation'), ['confirmed']),
+            ],
             'tipo_funcionario' => ['required', new Enum(CargoFuncionario::class)],
         ];
     }
@@ -53,6 +59,7 @@ abstract class StoreFuncionarioRequest extends FormRequest
             'cpf_funcionario.unique' => 'Já existe um funcionário com este CPF.',
             'senha_funcionario.required' => 'Informe a senha do funcionário.',
             'senha_funcionario.min' => 'A senha deve ter pelo menos 8 caracteres.',
+            'senha_funcionario.confirmed' => 'A confirmação da senha não corresponde.',
             'tipo_funcionario.required' => 'Selecione o cargo do funcionário.',
         ];
     }

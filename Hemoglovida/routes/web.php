@@ -62,13 +62,25 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
         Route::view('/Hem_Tela_Inicial.blade.php', 'hemocentro.Hem_Tela_Inicial')->name('inicio');
         Route::view('/Hem_Triagem.blade.php', 'hemocentro.Hem_Triagem')->name('triagem');
         Route::view('/Hem_Usuario.blade.php', 'hemocentro.Hem_Usuario')->name('usuario');
-        Route::view('/Hem_cadastro_funcionario.blade.php', 'hemocentro.Hem_cadastro_funcionario')
+
+        Route::get('/Hem_cadastro_funcionario.blade.php', [HemocentroFuncionarioController::class, 'index'])
             ->middleware('cadastro-funcionario:hemocentro')
             ->name('cadastro-funcionario');
 
         Route::post('/Hem_cadastro_funcionario.blade.php', [HemocentroFuncionarioController::class, 'store'])
             ->middleware(['throttle:20,1', 'cadastro-funcionario:hemocentro'])
             ->name('funcionario.store');
+
+        Route::middleware(['gerenciar-funcionarios:hemocentro', 'throttle:20,1'])->group(function (): void {
+            Route::get('/funcionarios', [HemocentroFuncionarioController::class, 'index'])
+                ->name('funcionarios');
+            Route::post('/funcionarios', [HemocentroFuncionarioController::class, 'store'])
+                ->name('funcionarios.store');
+            Route::put('/funcionarios/{funcionario}', [HemocentroFuncionarioController::class, 'update'])
+                ->name('funcionarios.update');
+            Route::delete('/funcionarios/{funcionario}', [HemocentroFuncionarioController::class, 'destroy'])
+                ->name('funcionarios.destroy');
+        });
     });
 });
 
@@ -115,13 +127,25 @@ Route::prefix('hospital')->name('hospital.')->group(function (): void {
             Route::view('/Hospital_estoque.blade.php', 'hospital.Hospital_estoque')->name('estoque');
             Route::view('/Hospital_pedidos.blade.php', 'hospital.Hospital_pedidos')->name('pedidos');
             Route::view('/Hospital_usuario.blade.php', 'hospital.Hospital_usuario')->name('usuario');
-            Route::view('/Hospital_cadastro_funcionario.blade.php', 'hospital.Hospital_cadastro_funcionario')
+
+            Route::get('/Hospital_cadastro_funcionario.blade.php', [HospitalFuncionarioController::class, 'index'])
                 ->middleware('cadastro-funcionario:hospital')
                 ->name('cadastro-funcionario');
 
             Route::post('/Hospital_cadastro_funcionario.blade.php', [HospitalFuncionarioController::class, 'store'])
                 ->middleware(['throttle:20,1', 'cadastro-funcionario:hospital'])
                 ->name('funcionario.store');
+
+            Route::middleware(['gerenciar-funcionarios:hospital', 'throttle:20,1'])->group(function (): void {
+                Route::get('/funcionarios', [HospitalFuncionarioController::class, 'index'])
+                    ->name('funcionarios');
+                Route::post('/funcionarios', [HospitalFuncionarioController::class, 'store'])
+                    ->name('funcionarios.store');
+                Route::put('/funcionarios/{funcionario}', [HospitalFuncionarioController::class, 'update'])
+                    ->name('funcionarios.update');
+                Route::delete('/funcionarios/{funcionario}', [HospitalFuncionarioController::class, 'destroy'])
+                    ->name('funcionarios.destroy');
+            });
         });
     });
 });

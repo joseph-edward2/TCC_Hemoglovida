@@ -22,6 +22,9 @@
       <nav>
         <a href="{{ route('hospital.estoque') }}">Estoque</a>
         <a href="{{ route('hospital.pedidos') }}">Pedidos</a>
+        @can('gerenciar-funcionarios', 'hospital')
+          <a href="{{ route('hospital.funcionarios') }}">Funcionários</a>
+        @endcan
       </nav>
     </div>
 
@@ -110,9 +113,6 @@
 
   <div class="bottom-actions">
     <button class="btn-solid" id="saveBtn">Salvar Alterações</button>
-    @if ($podeCadastrarFuncionario('hospital'))
-      <a class="btn-solid" href="{{ route('hospital.cadastro-funcionario') }}">Cadastro Funcionário</a>
-    @endif
 
     <form method="POST" action="{{ route('hospital.logout') }}">
       @csrf

@@ -29,6 +29,9 @@
       <a href="Hem_Agendamento.blade.php">Agendamentos</a>
       <a href="Hem_Pedidos.blade.php">Pedidos</a>
       <a href="Hem_Alertas.blade.php">Alertas</a>
+    @can('gerenciar-funcionarios', 'hemocentro')
+      <a href="{{ route('hemocentro.funcionarios') }}">Funcionários</a>
+    @endcan
     </nav>
   </div>
 

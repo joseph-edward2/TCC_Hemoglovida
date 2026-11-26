@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('cadastrar-funcionario', function (mixed $usuario, string $instituicao): bool {
+        Gate::define('gerenciar-funcionarios', function (mixed $usuario, string $instituicao): bool {
             if (! in_array($instituicao, ['hemocentro', 'hospital'], true)) {
                 return false;
             }
@@ -45,9 +45,10 @@ class AppServiceProvider extends ServiceProvider
             return filled($funcionario->{$campo});
         });
 
+        Gate::define('cadastrar-funcionario', fn (mixed $usuario, string $instituicao): bool => Gate::allows('gerenciar-funcionarios', $instituicao));
+
         View::share([
             'hospitalSessao' => fn (): ?Hospital => Hospital::daSessao(),
-            'podeCadastrarFuncionario' => fn (string $instituicao): bool => Gate::allows('cadastrar-funcionario', $instituicao),
             'fotoPerfil' => function (): string {
                 if (Auth::guard('funcionario')->check()) {
                     return asset('assets/avatar.jpg');

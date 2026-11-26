@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CargoFuncionario;
 use Database\Factories\FuncionarioFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -42,6 +43,19 @@ class Funcionario extends Authenticatable
             'senha_fun' => 'hashed',
             'tipo_fun' => CargoFuncionario::class,
         ];
+    }
+
+    protected function cpfMascarado(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $cpf = preg_replace('/\D/', '', (string) $this->cpf_fun) ?? '';
+
+            if (strlen($cpf) !== 11) {
+                return '—';
+            }
+
+            return '***.'.substr($cpf, 3, 3).'.'.substr($cpf, 6, 3).'-**';
+        });
     }
 
     protected static function booted(): void
