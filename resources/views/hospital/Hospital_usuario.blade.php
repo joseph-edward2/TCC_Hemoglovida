@@ -144,7 +144,7 @@
 
     <div class="modal-icon"><i class="ph ph-warning"></i></div>
     <h2>Encerrar Conta</h2>
-    <p class="modal-text">Essa ação é permanente e removerá seu acesso ao painel do hemocentro. Tem certeza que deseja continuar?</p>
+    <p class="modal-text">Essa ação é permanente e removerá seu acesso ao painel do hospital. Tem certeza que deseja continuar?</p>
 
     <div class="modal-actions">
       <button class="btn-danger" id="cancelDelete">Cancelar</button>
