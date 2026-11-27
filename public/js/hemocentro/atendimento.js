@@ -3,6 +3,8 @@ const agendamentos = Array.from(agendaEl.querySelectorAll('.agenda__item'));
 const paginacaoEl = document.getElementById('paginacao');
 const btnConfirmarChegada = document.getElementById('btnConfirmarChegada');
 const btnDoacaoRealizada = document.getElementById('btnDoacaoRealizada');
+const btnAusencia = document.getElementById('btnAusencia');
+const modalAusencia = document.getElementById('modalAusencia');
 const atendimentoErro = document.getElementById('atendimentoErro');
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
@@ -19,7 +21,8 @@ const situacoes = new Map([
   ['agendado', { rotulo: 'Agendado', classe: 'agendado', etapa: 1 }],
   ['atrasado', { rotulo: 'Atrasado', classe: 'atrasado', etapa: 1 }],
   ['chegou', { rotulo: 'Em Andamento', classe: 'em-andamento', etapa: 2 }],
-  ['concluido', { rotulo: 'Finalizado', classe: 'finalizado', etapa: 3 }]
+  ['concluido', { rotulo: 'Finalizado', classe: 'finalizado', etapa: 3 }],
+  ['cancelado', { rotulo: 'Cancelado', classe: 'cancelado', etapa: -1 }]
 ]);
 const indisponivel = { rotulo: 'Indisponível', classe: 'agendado', etapa: 0 };
 
@@ -95,6 +98,7 @@ function renderizarPassos() {
   });
 
   btnConfirmarChegada.disabled = enviando || etapa !== 1;
+  btnAusencia.disabled = enviando || etapa !== 1;
   btnDoacaoRealizada.disabled = enviando || etapa !== 2;
 }
 
@@ -150,6 +154,14 @@ paginacaoEl.addEventListener('click', (event) => {
 
 btnConfirmarChegada.addEventListener('click', () => executarEtapa(pacienteAtual.dataset.chegada));
 btnDoacaoRealizada.addEventListener('click', () => executarEtapa(pacienteAtual.dataset.concluir));
+btnAusencia.addEventListener('click', () => {
+  document.getElementById('nomeAusencia').textContent = pacienteNomeEl.textContent;
+  modalAusencia.showModal();
+});
+document.getElementById('btnCancelarAgendamento').addEventListener('click', () => {
+  modalAusencia.close();
+  executarEtapa(pacienteAtual.dataset.ausencia);
+});
 agendaEl.addEventListener('click', tratarSelecaoAgenda);
 agendaEl.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' || event.key === ' ') {

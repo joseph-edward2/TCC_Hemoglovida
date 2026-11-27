@@ -21,7 +21,6 @@ class HemocentroAtendimentoController extends Controller
     {
         $agendamentos = $this->todayAppointments($request->user()->cnes_hem)
             ->join('doador', 'doador.cpf_doador', '=', 'agendamento.cpf_doador')
-            ->where('status_agendamento', '<>', 'cancelado')
             ->orderBy('data_hora_agendamento')
             ->orderBy('protocolo_agendamento')
             ->get([
@@ -48,21 +47,31 @@ class HemocentroAtendimentoController extends Controller
 
     public function confirmarChegada(Request $request, string $protocolo): JsonResponse
     {
+        return $this->updatePendingAppointment($request, $protocolo, 'chegou', 'A chegada não pode ser confirmada no status atual.');
+    }
+
+    public function registrarAusencia(Request $request, string $protocolo): JsonResponse
+    {
+        return $this->updatePendingAppointment($request, $protocolo, 'cancelado', 'A ausência não pode ser registrada no status atual.');
+    }
+
+    private function updatePendingAppointment(Request $request, string $protocolo, string $status, string $conflictMessage): JsonResponse
+    {
         $appointmentQuery = $this->todayAppointments($request->user()->cnes_hem)
             ->where('protocolo_agendamento', $protocolo);
 
         $updated = (clone $appointmentQuery)
             ->whereIn('status_agendamento', ['agendado', 'atrasado'])
             ->whereNull('data_hora_coleta')
-            ->update(['status_agendamento' => 'chegou']);
+            ->update(['status_agendamento' => $status]);
 
         if ($updated === 0) {
             $appointment = $appointmentQuery->first();
             abort_if($appointment === null, 404);
-            abort_unless($this->appointmentStatus($appointment) === 'chegou', 409, 'A chegada não pode ser confirmada no status atual.');
+            abort_unless($this->appointmentStatus($appointment) === $status, 409, $conflictMessage);
         }
 
-        return response()->json(['status' => 'chegou']);
+        return response()->json(['status' => $status]);
     }
 
     public function concluir(Request $request, string $protocolo): JsonResponse

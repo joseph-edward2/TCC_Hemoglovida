@@ -51,6 +51,8 @@ Route::prefix('hemocentro')->name('hemocentro.')->group(function (): void {
             ->whereNumber('protocolo')->name('atendimento.chegada');
         Route::post('/atendimento/{protocolo}/doacao-realizada', [HemocentroAtendimentoController::class, 'concluir'])
             ->whereNumber('protocolo')->name('atendimento.concluir');
+        Route::post('/atendimento/{protocolo}/nao-compareceu', [HemocentroAtendimentoController::class, 'registrarAusencia'])
+            ->whereNumber('protocolo')->name('atendimento.ausencia');
         Route::get('/Hem_Estoque.blade.php', HemocentroEstoqueController::class)->name('estoque');
         Route::get('/Hem_Pedidos.blade.php', [HemocentroPedidoController::class, 'index'])->name('pedidos');
         Route::get('/pedidos/{pedido}/requisicao', [HemocentroPedidoController::class, 'requisicao'])

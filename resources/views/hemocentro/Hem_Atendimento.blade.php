@@ -94,7 +94,16 @@
             <div class="card__actions">
               <button type="button" class="btn btn-primary" id="btnConfirmarChegada" disabled>Confirmar Chegada</button>
               <button type="button" class="btn btn-outline" id="btnDoacaoRealizada" disabled>Doação Realizada</button>
+              <button type="button" class="btn btn-outline btn-ausencia" id="btnAusencia" aria-haspopup="dialog" disabled>Não compareceu</button>
             </div>
+            <dialog class="panel modal-confirmacao" id="modalAusencia" aria-labelledby="tituloAusencia" aria-describedby="descricaoAusencia">
+              <h2 class="card__title" id="tituloAusencia">Cancelar agendamento?</h2>
+              <p id="descricaoAusencia">Confirma que <strong id="nomeAusencia"></strong> não compareceu e deseja cancelar este agendamento?</p>
+              <form method="dialog" class="page-actions">
+                <button type="submit" class="btn btn-outline" autofocus>Manter agendamento</button>
+                <button type="button" class="btn btn-primary" id="btnCancelarAgendamento">Cancelar agendamento</button>
+              </form>
+            </dialog>
             <p id="atendimentoErro" role="alert" hidden></p>
           @endif
         </section>
@@ -121,6 +130,7 @@
                   data-tipo="{{ $agendamento['tipo'] }}"
                   data-cpf="{{ $agendamento['cpf'] }}"
                   data-chegada="{{ route('hemocentro.atendimento.chegada', $agendamento['protocolo'], false) }}"
+                  data-ausencia="{{ route('hemocentro.atendimento.ausencia', $agendamento['protocolo'], false) }}"
                   data-concluir="{{ route('hemocentro.atendimento.concluir', $agendamento['protocolo'], false) }}">
                 <span class="agenda__iniciais" aria-hidden="true"></span>
                 <span class="agenda__nome">{{ $agendamento['nome'] }}</span>

@@ -172,16 +172,19 @@
 .step__line--done{ background-color: var(--brand); }
 
 .card__actions{
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 18px;
 }
 
 .card__actions .btn{
-  flex: 1;
   justify-content: center;
 }
 
+.btn-ausencia{
+  grid-column: 1 / -1;
+}
 
 .alerta{
   background-color: var(--brand-light);
@@ -275,6 +278,10 @@
   color: #2e7d32;
 }
 
+.badge-status--cancelado{
+  background-color: var(--brand-light);
+  color: var(--brand-dark);
+}
 
 .paginacao{
   display: flex;

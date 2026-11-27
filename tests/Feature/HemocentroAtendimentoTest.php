@@ -26,9 +26,10 @@ test('mostra apenas os agendamentos do hemocentro autenticado no dia local', fun
         ->assertOk()
         ->assertSeeInOrder(['Agendamentos de Hoje', $nome, '00:00', 'Doador com coleta anterior', '22:00'])
         ->assertSee('data-status="concluido"', false)
+        ->assertSeeText('Doador cancelado')
         ->assertSee('data-cpf="123.***.***-01"', false)
         ->assertDontSee($nome, false)
-        ->assertDontSee(['12300000001', 'Doador de ontem', 'Doador de amanhã', 'Doador cancelado', 'Doador de outro hemocentro']);
+        ->assertDontSee(['12300000001', 'Doador de ontem', 'Doador de amanhã', 'Doador de outro hemocentro']);
 });
 
 test('mostra a agenda vazia quando o hemocentro não tem agendamentos no dia', function () {
@@ -111,11 +112,50 @@ test('retorna 409 ao concluir antes de confirmar a chegada', function () {
     $this->assertDatabaseEmpty('bolsa_sangue');
 });
 
+test('mantém o agendamento cancelado por ausência no atendimento do dia', function (string $status) {
+    $this->travelTo(Carbon::parse('2026-11-24 01:30:00', 'UTC'));
+    $funcionario = Funcionario::factory()->create();
+    $hemocentro = Hemocentro::findOrFail($funcionario->cnes_hem);
+    createAtendimentoAppointment($hemocentro, 1, ['status_agendamento' => $status]);
+    $url = route('hemocentro.atendimento.ausencia', 1);
+
+    $this->actingAs($funcionario, 'funcionario')->get(route('hemocentro.atendimento'))
+        ->assertSeeInOrder(['Não compareceu', 'Manter agendamento', 'Cancelar agendamento']);
+    $this->postJson($url)->assertOk()->assertExactJson(['status' => 'cancelado']);
+    $this->postJson($url)->assertOk();
+
+    $this->assertDatabaseHas('agendamento', ['protocolo_agendamento' => 1, 'status_agendamento' => 'cancelado', 'data_hora_coleta' => null]);
+    $this->assertDatabaseEmpty('bolsa_sangue');
+    $this->get(route('hemocentro.atendimento'))
+        ->assertSee('data-status="cancelado"', false)
+        ->assertSeeText('Doador de teste');
+})->with(['agendado', 'atrasado']);
+
+test('retorna 409 ao registrar ausência após chegada ou coleta', function (string $status, ?string $coleta) {
+    $this->travelTo(Carbon::parse('2026-11-24 01:30:00', 'UTC'));
+    $hemocentro = Hemocentro::factory()->create();
+    $dados = ['status_agendamento' => $status, 'data_hora_coleta' => $coleta];
+    createAtendimentoAppointment($hemocentro, 1, $dados);
+
+    $this->actingAs($hemocentro, 'hemocentro')->postJson(route('hemocentro.atendimento.ausencia', 1))
+        ->assertConflict()->assertJsonPath('message', 'A ausência não pode ser registrada no status atual.');
+    $this->assertDatabaseHas('agendamento', ['protocolo_agendamento' => 1] + $dados);
+})->with([['chegou', null], ['concluido', null], ['agendado', '2026-11-24 01:10:00']]);
+
+test('retorna 404 ao registrar ausência de outro dia', function () {
+    $this->travelTo(Carbon::parse('2026-11-25 01:30:00', 'UTC'));
+    $hemocentro = Hemocentro::factory()->create();
+    createAtendimentoAppointment($hemocentro, 1);
+
+    $this->actingAs($hemocentro, 'hemocentro')->postJson(route('hemocentro.atendimento.ausencia', 1))->assertNotFound();
+    $this->assertDatabaseHas('agendamento', ['protocolo_agendamento' => 1, 'status_agendamento' => 'agendado']);
+});
+
 test('retorna 404 ao registrar uma etapa de outro hemocentro', function (string $acao) {
     $this->travelTo(Carbon::parse('2026-11-24 01:30:00', 'UTC'));
     $hemocentro = Hemocentro::factory()->create();
     $outroHemocentro = Hemocentro::factory()->create();
-    $status = $acao === 'chegada' ? 'agendado' : 'chegou';
+    $status = $acao === 'concluir' ? 'chegou' : 'agendado';
     createAtendimentoAppointment($outroHemocentro, 1, ['status_agendamento' => $status]);
 
     $this->actingAs($hemocentro, 'hemocentro')
@@ -124,11 +164,11 @@ test('retorna 404 ao registrar uma etapa de outro hemocentro', function (string 
 
     $this->assertDatabaseHas('agendamento', ['protocolo_agendamento' => 1, 'status_agendamento' => $status, 'data_hora_coleta' => null]);
     $this->assertDatabaseEmpty('bolsa_sangue');
-})->with(['chegada', 'concluir']);
+})->with(['chegada', 'concluir', 'ausencia']);
 
 test('retorna 401 ao registrar uma etapa sem autenticação', function (string $acao) {
     $this->postJson(route('hemocentro.atendimento.'.$acao, 1))->assertUnauthorized();
-})->with(['chegada', 'concluir']);
+})->with(['chegada', 'concluir', 'ausencia']);
 
 /**
  * @param  array{data_hora_agendamento?: string, data_hora_coleta?: string, status_agendamento?: string, status_bolsa_doacao?: string, volume_ml_doacao?: int}  $attributes
